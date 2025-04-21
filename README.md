@@ -1,6 +1,6 @@
 <p align="center">
   <img src="images/antispace-logo.webp" height="128">
-  <h1 align="center">Antispace App Lab</h1>
+  <h1 align="center">Antispace AIOS Labs</h1>
 </p>
 <p align="center">
   <a aria-label="Follow Antispace on X" href="https://x.com/antispaceAI">
@@ -11,7 +11,7 @@
   </a>
 </p>
 
-[Antispace](https://antispace.app/) empowers you to build and deploy powerful applications with minimal effort. This repository contains all apps available in the [Antispace App Lab](https://antispace.app/lab). It includes documentation and examples of how to extend Antispace using our modern development framework.
+[Antispace](https://antispace.app/) empowers you to build and deploy powerful applications with minimal effort. This repository contains all apps available in the [Antispace AIOS Labs](https://antispace.app/lab). It includes documentation and examples of how to extend Antispace using our modern development framework.
 
 ![Header](images/header.webp)
 
