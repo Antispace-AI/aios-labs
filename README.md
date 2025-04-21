@@ -1,6 +1,7 @@
 <div align="center">
 <picture>
-  <img alt="antispace" media="(prefers-color-scheme: light)" src="/docs/antispace.png" width="50%" height="auto">
+  <img alt="antispace" media="(prefers-color-scheme: light)" src="/docs/antispace.svg" width="50%" height="auto">
+  <img alt="aios labs" media="(prefers-color-scheme: light)" src="/docs/aios_labs.svg" width="30%" height="auto">
 </picture>
 
   The World's First AIOS, maintained by [Antispace](https://anti.space).
