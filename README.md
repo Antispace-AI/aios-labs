@@ -1,19 +1,21 @@
 <div align="center">
-<p align="center"> 
-  <h1 align="center" style="margin-top: -20px;">AIOS Labs</h1>
-</p>
+<picture>
+  <img alt="antispace" media="(prefers-color-scheme: light)" src="/docs/antispace.png" width="50%" height="auto">
+</picture>
 
-Antispace: Maintained by [antispace](https://anti.space).
+  The World's First AIOS, maintained by [Antispace](https://anti.space).
 
 <h3>
+  
 [Homepage](https://anti.space) | [Documentation](https://docs.anti.space/) | [Twitter](https://x.com/antispaceAI) | [Discord](https://discord.gg/64XZqNU6JF)
+
 </h3>
-
-[Antispace](https://antispace.app/) empowers you to build and deploy powerful applications with minimal effort. This repository contains all apps available in the [Antispace AIOS Labs](https://antispace.app/lab). It includes documentation and examples of how to extend Antispace using our modern development framework.
-
-![Header](images/header.webp)
-
 </div>
+
+---
+
+[Antispace](https://anti.space) empowers you to build and deploy powerful applications with minimal effort. This repository contains all apps available in the [Antispace AIOS Labs](https://antispace.app/lab). It includes documentation and examples of how to extend Antispace using our modern development framework.
+
 ## Getting Started
 
 Visit [https://developers.antispace.app](https://developers.antispace.app) to get started with our API. If you want to discover and install apps, check out [our App Lab](https://antispace.app/lab).
