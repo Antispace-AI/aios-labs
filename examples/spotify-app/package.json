@@ -1,0 +1,21 @@
+{
+	"name": "integration-1",
+	"scripts": {
+		"dev": "tsx watch src/index.tsx",
+		"db:generate": "drizzle-kit generate",
+		"db:up": "drizzle-kit up"
+	},
+	"dependencies": {
+		"@antispace/sdk": "^0.0.2",
+		"@spotify/web-api-ts-sdk": "^1.2.0",
+		"dotenv": "^16.4.7"
+	},
+	"devDependencies": {
+		"@types/node": "^20.11.17",
+		"@types/uuid": "10.0.0",
+		"drizzle-kit": "^0.29.1",
+		"hono": "^4.6.15",
+		"tsx": "^4.7.1",
+		"typescript": "^5.7.2"
+	}
+}
