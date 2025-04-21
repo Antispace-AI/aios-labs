@@ -1,7 +1,4 @@
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { config } from "dotenv";
-
-config();
 
 export const SPOTIFY_CONFIG = {
 	clientId: process.env.SPOTIFY_CLIENT_ID || "",

@@ -7,8 +7,7 @@
 	},
 	"dependencies": {
 		"@antispace/sdk": "^0.0.2",
-		"@spotify/web-api-ts-sdk": "^1.2.0",
-		"dotenv": "^16.4.7"
+		"@spotify/web-api-ts-sdk": "^1.2.0"
 	},
 	"devDependencies": {
 		"@types/node": "^20.11.17",
