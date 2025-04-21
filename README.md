@@ -1,15 +1,14 @@
 <p align="center">
-  <img src="images/antispace-logo.webp" height="128">
+  <img src="/docs/hero_triangle.webp" height="128">
   <h1 align="center">Antispace AIOS Labs</h1>
 </p>
-<p align="center">
-  <a aria-label="Follow Antispace on X" href="https://x.com/antispaceAI">
-    <img alt="" src="https://img.shields.io/badge/Follow%20@antispaceapp-black.svg?style=for-the-badge&logo=X">
-  </a>
-  <a aria-label="Join the community on Discord" href="https://antispace.app/community">
-    <img alt="" src="https://img.shields.io/badge/Join%20the%20community-black.svg?style=for-the-badge&logo=Discord">
-  </a>
-</p>
+
+Antispace: Maintained by [antispace](https://anti.space).
+
+
+<h3>
+[Homepage](https://anti.space) | [Documentation](https://docs.anti.space/) | [Twitter](https://x.com/antispaceAI) | [Discord](https://discord.gg/ZjZadyC7PK)
+</h3>
 
 [Antispace](https://antispace.app/) empowers you to build and deploy powerful applications with minimal effort. This repository contains all apps available in the [Antispace AIOS Labs](https://antispace.app/lab). It includes documentation and examples of how to extend Antispace using our modern development framework.
 
