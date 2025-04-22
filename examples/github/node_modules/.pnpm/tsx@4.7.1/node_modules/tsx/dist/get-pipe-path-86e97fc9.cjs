@@ -1,1 +1,0 @@
-"use strict";var t=require("path"),p=require("./temporary-directory-2a027842.cjs");const i=r=>{const e=t.join(p.tmpdir,`${r}.pipe`);return process.platform==="win32"?`\\\\?\\pipe\\${e}`:e};exports.getPipePath=i;
