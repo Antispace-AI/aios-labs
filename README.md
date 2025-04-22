@@ -2,17 +2,30 @@
 <!-- <picture>
   <img alt="antispace" media="(prefers-color-scheme: light)" src="/docs/antispace.svg" width="50%" height="auto">
 </picture> <br/><br/> -->
+<!-- <picture>
+  <img alt="antispace" media="(prefers-color-scheme: light)" src="/docs/aios.svg" width="10%" height="auto">
+</picture><br/>
 <picture>
-  <img alt="antispace" media="(prefers-color-scheme: light)" src="/docs/aios.svg" width="20%" height="auto">
-</picture><br/><br/>
+  <img alt="aios labs" media="(prefers-color-scheme: light)" src="/docs/app.svg" width="22%" height="auto">
+</picture>   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <picture>
-  <img alt="aios labs" media="(prefers-color-scheme: light)" src="/docs/app.svg" width="50%" height="auto">
+  <img alt="aios labs" media="(prefers-color-scheme: light)" src="/docs/lab.svg" width="22%" height="auto">
+</picture><br/><br/> --> 
+<picture>
+  <img alt="antispace" media="(prefers-color-scheme: light)" src="/docs/aios.svg" width="10%" height="auto">
 </picture>
+<br/>
 <picture>
-  <img alt="aios labs" media="(prefers-color-scheme: light)" src="/docs/lab.svg" width="50%" height="auto">
-</picture><br/><br/>
+  <img alt="aios labs" media="(prefers-color-scheme: light)" src="/docs/app.svg" width="22%" height="auto">
+</picture> 
+<br/>
+<picture>
+  <img alt="aios labs" media="(prefers-color-scheme: light)" src="/docs/lab.svg" width="22%" height="auto">
+</picture>
+<br/>
+<br/>
 
-  The World's First Artificially Intelligent Operating System, maintained by [Antispace](https://anti.space).
+The World's First Artificially Intelligent Operating System, maintained by [Antispace](https://anti.space).
 
 <h3>
   
@@ -23,7 +36,7 @@
 
 ---
 
-This may not seem like the traditional operating systems, but it is an operating system [built on the web]. 
+This may not seem like any traditional operating systems, but it is an operating system [built on the web]. 
 
 This repo allows you to build and deploy powerful AI applications with minimal effort. These apps function as a new unlock to the skill tree of your AI in the AIOS, and talk with the custom AI personality you created in the Antispace.
 
