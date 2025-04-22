@@ -1,0 +1,23 @@
+{
+  "name": "wallpaper-generator",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/index.tsx",
+    "dev": "bun run --watch src/index.tsx",
+    "db:generate": "drizzle-kit generate",
+    "db:up": "drizzle-kit up"
+  },
+  "dependencies": {
+    "@antispace/sdk": "latest",
+    "drizzle-orm": "^0.37.0",
+    "hono": "^4.6.12",
+    "replicate": "^1.0.1",
+    "uuid": "10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "@types/uuid": "10.0.0",
+    "drizzle-kit": "^0.29.1",
+    "tsx": "^4.7.1"
+  }
+}

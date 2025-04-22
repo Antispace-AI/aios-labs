@@ -1,0 +1,17 @@
+{
+  "name": "integration-1",
+  "scripts": {
+    "dev": "tsx watch src/index.tsx"
+  },
+  "dependencies": {
+    "@antispace/sdk": "^0.0.10",
+    "@supabase/supabase-js": "^2.49.4",
+    "dotenv": "^16.5.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "hono": "^4.6.15",
+    "typescript": "^5.7.2"
+  }
+}
