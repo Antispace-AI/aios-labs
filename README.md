@@ -12,15 +12,17 @@
   <img alt="aios labs" media="(prefers-color-scheme: light)" src="/docs/lab.svg" width="22%" height="auto">
 </picture><br/><br/> --> 
 <picture>
-  <img alt="antispace" media="(prefers-color-scheme: light)" src="/docs/aios.svg" width="10%" height="auto">
+  <img alt="antispace" media="(prefers-color-scheme: light)" src="docs/aios.svg" width="10%" height="auto">
 </picture>
 <br/>
 <picture>
-  <img alt="aios labs" media="(prefers-color-scheme: light)" src="/docs/app.svg" width="22%" height="auto">
-</picture> 
+  <source media="(prefers-color-scheme: dark)" srcset="docs/app.svg">
+  <img alt="aios labs" media="(prefers-color-scheme: light)" src="docs/app-light.svg" width="22%" height="auto">
+</picture>
 <br/>
 <picture>
-  <img alt="aios labs" media="(prefers-color-scheme: light)" src="/docs/lab.svg" width="22%" height="auto">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/lab.svg">
+  <img alt="aios labs" media="(prefers-color-scheme: light)" src="docs/lab-light.svg" width="22%" height="auto">
 </picture>
 <br/>
 <br/>
