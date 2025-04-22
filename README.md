@@ -3,7 +3,10 @@
   <img alt="antispace" media="(prefers-color-scheme: light)" src="/docs/antispace.svg" width="50%" height="auto">
 </picture> <br/><br/> -->
 <picture>
-  <img alt="aios labs" media="(prefers-color-scheme: light)" src="/docs/aios_labs.svg" width="60%" height="auto">
+  <img alt="antispace" media="(prefers-color-scheme: light)" src="/docs/aios.svg" width="20%" height="auto">
+</picture>
+<picture>
+  <img alt="aios labs" media="(prefers-color-scheme: light)" src="/docs/app_lab.svg" width="50%" height="auto">
 </picture><br/><br/>
 
   The World's First Artificially Intelligent Operating System, maintained by [Antispace](https://anti.space).
