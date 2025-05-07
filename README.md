@@ -54,12 +54,11 @@ There has been a lot of interest in antispace lately. Following these guidelines
 You can create new power sets into the Antispace AIOS system, here are some notes and bounties that might help on your journey.
 
 We'll start with what will get your PR closed with a pointer to this section:
-
 - No code golf! While low line count is a guiding light of this project, anything that remotely looks like code golf will be closed. The true goal is reducing complexity and increasing readability, and deleting \ns does nothing to help with that.
 - All docs and whitespace changes will be closed unless you are a well-known contributor. The people writing the docs should be those who know the codebase the absolute best. People who have not demonstrated that shouldn't be messing with docs. Whitespace changes are both useless and carry a risk of introducing bugs.
 - Anything you claim is a "speedup" must be benchmarked. In general, the goal is simplicity, so even if your PR makes things marginally faster, you have to consider the tradeoff with maintainability and readability.
 - If your PR looks "complex", is a big diff, or adds lots of lines, it won't be reviewed or merged. Consider breaking it up into smaller PRs that are individually clear wins. A common pattern I see is prerequisite refactors before adding new functionality. If you can (cleanly) refactor to the point that the feature is a 3 line change, this is great, and something easy for us to review.
-
+- For character creations if your character is used by more than 20 people you will get a bounty of 5$. If it is used by more than 100 people you will get a bounty of 20$. If it is used by more than 10000 people you will get a bounty of 100$ or more.
 Now, what we want:
 
 - Bug fixes (with a regression test) are great! This library isn't 1.0 yet, so if you stumble upon a bug, fix it, write a test, and submit a PR, this is valuable work.
