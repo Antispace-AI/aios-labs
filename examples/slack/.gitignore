@@ -1,0 +1,31 @@
+# Dependency directories
+node_modules/
+
+# Bun lockfile
+bun.lock
+
+# Project specific
+.anti/
+
+# Local database file (POC only)
+slack_users.json
+
+# macOS
+.DS_Store
+
+# Logs
+logs
+*.log
+
+# dotenv environment variables file
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Examples folder
+examples/
+docs/
+
+slack_poc_implementation_plan.md
