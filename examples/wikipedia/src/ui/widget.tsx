@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { components as Anti, type AntispaceContext } from "@antispace/sdk";
 import { wiki_get_featured_article } from "../ai/actions";
 import type { WikiAppUIActions } from "../../types";
@@ -10,63 +9,91 @@ import db from "../db/local";
  * @returns JSX markup string response
  */
 export default async function widgetUI(
-	anti: AntispaceContext<WikiAppUIActions>,
+  anti: AntispaceContext<WikiAppUIActions>,
 ) {
-	const { action, values, meta } = anti;
+  const { action, values, meta } = anti;
 
-	// Call the AI function to get featured article
-	const featuredArticleResponse = await wiki_get_featured_article({});
+  const featuredArticleResponse = await wiki_get_featured_article();
+  const isSuccess = featuredArticleResponse?.success === true;
+  const featuredArticle = isSuccess ? featuredArticleResponse?.results : null;
 
-	// Check if the AI call was successful
-	const isSuccess = featuredArticleResponse?.success === true;
-	const featuredArticle = isSuccess ? featuredArticleResponse?.results : null;
-
-	console.log("featuredArticleResponse?.results: ", featuredArticleResponse);
-
-	return (
-		<Anti.Column padding="medium" gap="medium">
-			{/* Header Section */}
-			<Anti.Column gap="small">
-				<Anti.Text type="heading1">📚 Wikipedia</Anti.Text>
-				<Anti.Text type="dim">
-					Discover knowledge from the world's largest encyclopedia
-				</Anti.Text>
-			</Anti.Column>
-
-			{/* Featured Article Section */}
-			<Anti.Column gap="medium">
-				<Anti.Text type="heading2">✨ Today's Featured Article</Anti.Text>
-				
-				{isSuccess ? (
-					<Anti.Column gap="small">
-						{/* Article Title - Make it clickable and prominent */}
-						<Anti.Link 
-							href={featuredArticle.url} 
-							text={featuredArticle.title}
-							style={{ fontSize: "1.2em", fontWeight: "bold", color: "#0066cc" }}
-						/>
-						
-						{/* Article Extract */}
-						<Anti.Text type="text" style={{ lineHeight: "1.5" }}>
-							{featuredArticle.extract}
-						</Anti.Text>
-						
-						{/* Call to Action */}
-						<Anti.Text type="dim" style={{ fontSize: "0.9em" }}>
-							🔗 Click the title above to read the full article on Wikipedia
-						</Anti.Text>
-					</Anti.Column>
-				) : (
-					<Anti.Column gap="small">
-						<Anti.Text type="error">
-							⚠️ Unable to load today's featured article
-						</Anti.Text>
-						<Anti.Text type="dim">
-							Please check your internet connection and try again. You can also visit Wikipedia directly to explore articles.
-						</Anti.Text>
-					</Anti.Column>
-				)}
-			</Anti.Column>
-		</Anti.Column>
-	);
+  return (
+    <Anti.Column width="full" spacing="medium">
+      <Anti.Row padding="medium" width="full" align="center">
+        <Anti.Column spacing="small" width="full">
+          <Anti.Text type="heading1" weight="bold">Wikipedia</Anti.Text>
+          <Anti.Text type="dim">The world's largest encyclopedia</Anti.Text>
+        </Anti.Column>
+        <Anti.Badge text="Featured" type="accent" />
+      </Anti.Row>
+      <Anti.Column type="border" padding="medium" spacing="medium" width="full">
+        <Anti.Row justify="space-between" align="center" width="full">
+          <Anti.Text type="heading2" weight="semibold">Today's Featured Article</Anti.Text>
+          <Anti.Badge text="New" type="primary" />
+        </Anti.Row>
+        
+        {isSuccess ? (
+          <Anti.Column spacing="medium" width="full">
+            <Anti.Text type="heading3" weight="bold">
+              {featuredArticle?.title || "Article Title"}
+            </Anti.Text>
+            
+            <Anti.Column type="border" padding="medium" width="full">
+              <Anti.Text type="body">
+                {featuredArticle?.extract || "Article content unavailable."}
+              </Anti.Text>
+            </Anti.Column>
+            
+            <Anti.Row justify="space-between" align="center" width="full">
+              <Anti.Text type="small">Source: Wikipedia</Anti.Text>
+              <Anti.Row spacing="small">
+                <Anti.Button 
+                  action="save_article" 
+                  text="Save" 
+                  type="secondary" 
+                  size="small" 
+                />
+                <Anti.Button 
+                  action="open_article" 
+                  text="Read Full Article" 
+                  type="primary" 
+                  size="small"
+                />
+              </Anti.Row>
+            </Anti.Row>
+          </Anti.Column>
+        ) : (
+          <Anti.Column spacing="medium" width="full" align="center" padding="large">
+            <Anti.Text type="negative" weight="semibold">
+              Unable to load today's featured article
+            </Anti.Text>
+            <Anti.Text type="dim" align="center">
+              Please check your internet connection and try again.
+            </Anti.Text>
+            <Anti.Button 
+              action="retry_load" 
+              text="Retry" 
+              type="accent" 
+              size="medium"
+            />
+          </Anti.Column>
+        )}
+      </Anti.Column>
+      <Anti.Row type="border" padding="medium" width="full" justify="space-between">
+        <Anti.Text type="subheading" weight="medium">Quick Links</Anti.Text>
+        <Anti.Row spacing="medium">
+          <Anti.Link href="https://en.wikipedia.org/wiki/Main_Page" text="Home" />
+          <Anti.Link href="https://en.wikipedia.org/wiki/Wikipedia:Contents" text="Contents" />
+          <Anti.Link href="https://en.wikipedia.org/wiki/Portal:Current_events" text="Current Events" />
+        </Anti.Row>
+      </Anti.Row>
+      <Anti.Column width="full" spacing="small">
+        <Anti.Divider type="horizontal" />
+        <Anti.Row padding="small" justify="space-between" align="center" width="full">
+          <Anti.Text type="small">Updated daily at midnight UTC</Anti.Text>
+          <Anti.Badge text="Wikipedia API" type="secondary" />
+        </Anti.Row>
+      </Anti.Column>
+    </Anti.Column>
+  );
 }
