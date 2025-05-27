@@ -1,0 +1,16 @@
+{
+  "name": "antispace-app-antislack",
+  "scripts": {
+    "dev": "tsx watch src/index.tsx"
+  },
+  "dependencies": {
+    "@antispace/sdk": "latest",
+    "@slack/web-api": "^7.9.2"
+  },
+  "devDependencies": {
+    "@types/node": "20.11.17",
+    "hono": "^4.6.15",
+    "tsx": "4.7.1",
+    "typescript": "5.7.2"
+  }
+}
