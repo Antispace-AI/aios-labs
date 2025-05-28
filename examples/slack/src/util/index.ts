@@ -19,6 +19,47 @@ export const getUser = async (userID: string): Promise<User> => {
 }
 
 /**
+ * Check if a user is authenticated with Slack
+ */
+export const isUserAuthenticated = async (userID: string): Promise<boolean> => {
+  try {
+    const user = await db.getUser(userID)
+    return !!(user && user.accessToken && user.accessToken.trim().length > 0)
+  } catch (error) {
+    console.error(`Error checking authentication for user ${userID}:`, error)
+    return false
+  }
+}
+
+/**
+ * Clear user's Slack authentication tokens (logout)
+ */
+export const clearUserTokens = async (userID: string): Promise<boolean> => {
+  try {
+    const user = await db.getUser(userID)
+    if (!user) {
+      return false // User doesn't exist
+    }
+
+    // Explicitly set auth-related fields to undefined to clear them
+    await db.updateUser(userID, {
+      accessToken: undefined,
+      refreshToken: undefined,
+      teamId: undefined,
+      teamName: undefined,
+      userId: undefined,
+      userName: undefined,
+    })
+
+    console.log(`Successfully cleared tokens for user ${userID}`)
+    return true
+  } catch (error) {
+    console.error(`Error clearing tokens for user ${userID}:`, error)
+    return false
+  }
+}
+
+/**
  * Update user's Slack authentication tokens
  */
 export const updateUserTokens = async (

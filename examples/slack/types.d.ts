@@ -7,4 +7,6 @@ export type SlackUIActions = {
   select_conversation: { channel: string }
   refresh_conversations: {}
   refresh_messages: { channel: string }
+  logout_slack: {}
+  check_auth_status: {}
 }
