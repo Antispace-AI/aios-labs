@@ -1,9 +1,26 @@
 import { sendMessage, getConversations, getMessages, searchMessages, getUserInfo, getConversationInfo } from "../../util/slack"
 import type { User } from "../../util"
+import { handleWidgetActions } from "./widget"
+import { handlePageActions } from "./page"
 
 /**
- * Slack action handlers
+ * Slack action handlers - now includes Phase 1 widget and page functions
  */
+
+// Define which functions belong to which category
+const WIDGET_FUNCTIONS = [
+  "get_total_unread_count",
+  "get_recent_unread_messages", 
+  "mark_conversation_read"
+]
+
+const PAGE_FUNCTIONS = [
+  "get_conversations_with_metadata",
+  "get_messages_with_pagination",
+  "search_messages_advanced",
+  "get_thread_messages",
+  "get_conversation_threads"
+]
 
 export async function handleSlackActions(
   name: string,
@@ -12,6 +29,17 @@ export async function handleSlackActions(
 ): Promise<any> {
   console.log("🔍 Handling Slack action:", name)
 
+  // Route to Phase 1 widget functions
+  if (WIDGET_FUNCTIONS.includes(name)) {
+    return await handleWidgetActions(name, parsedParams, user)
+  }
+
+  // Route to Phase 1 page functions
+  if (PAGE_FUNCTIONS.includes(name)) {
+    return await handlePageActions(name, parsedParams, user)
+  }
+
+  // Handle existing functions
   switch (name) {
     case "send_message": {
       console.log("🎯 send_message case - parsedParams:", parsedParams)

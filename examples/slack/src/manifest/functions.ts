@@ -264,3 +264,307 @@ export const manual_auth: AntispaceAppFunction<
     },
   },
 }
+
+/**
+ * PHASE 1 FUNCTIONS - Widget Functions
+ */
+
+/**
+ * Get total unread message count for widget display
+ */
+export const get_total_unread_count: AntispaceAppFunction<
+  "get_total_unread_count",
+  {}
+> = {
+  type: "function",
+  function: {
+    name: "get_total_unread_count",
+    description: "Get the total count of unread messages across all conversations, broken down by type (DMs, channels, mentions) for widget display",
+    parameters: {
+      type: "object",
+      properties: {},
+      required: [],
+    },
+  },
+}
+
+/**
+ * Get recent unread messages for widget preview
+ */
+export const get_recent_unread_messages: AntispaceAppFunction<
+  "get_recent_unread_messages",
+  {
+    limit?: number
+  }
+> = {
+  type: "function",
+  function: {
+    name: "get_recent_unread_messages",
+    description: "Get the most recent unread messages for widget preview display. Shows message previews with sender info and conversation context.",
+    parameters: {
+      type: "object",
+      properties: {
+        limit: {
+          type: "number",
+          description: "Maximum number of recent unread messages to return (default: 3, max: 10)",
+        },
+      },
+      required: [],
+    },
+  },
+}
+
+/**
+ * Mark a conversation as read
+ */
+export const mark_conversation_read: AntispaceAppFunction<
+  "mark_conversation_read",
+  {
+    conversation_id: string
+  }
+> = {
+  type: "function",
+  function: {
+    name: "mark_conversation_read",
+    description: "Mark all messages in a specific conversation as read. Used when user opens a conversation from the widget.",
+    parameters: {
+      type: "object",
+      properties: {
+        conversation_id: {
+          type: "string",
+          description: "Channel ID (e.g. C1234567890) or user ID for DM (e.g. U1234567890)",
+        },
+      },
+      required: ["conversation_id"],
+    },
+  },
+}
+
+/**
+ * PHASE 1 FUNCTIONS - Page UI Functions
+ */
+
+/**
+ * Get conversations with enhanced metadata for page UI
+ */
+export const get_conversations_with_metadata: AntispaceAppFunction<
+  "get_conversations_with_metadata",
+  {
+    type?: string
+    unread_only?: boolean
+    active_since?: string
+  }
+> = {
+  type: "function",
+  function: {
+    name: "get_conversations_with_metadata",
+    description: "Get list of conversations with enhanced metadata including unread counts, activity status, member counts, and more for page UI display",
+    parameters: {
+      type: "object",
+      properties: {
+        type: {
+          type: "string",
+          description: "Filter by conversation type: 'dm', 'channel', 'group', or 'all' (default: all)",
+        },
+        unread_only: {
+          type: "boolean",
+          description: "If true, only return conversations with unread messages (default: false)",
+        },
+        active_since: {
+          type: "string",
+          description: "Only return conversations active since this timestamp (ISO format)",
+        },
+      },
+      required: [],
+    },
+  },
+}
+
+/**
+ * Get messages with pagination for page UI
+ */
+export const get_messages_with_pagination: AntispaceAppFunction<
+  "get_messages_with_pagination",
+  {
+    conversation_id: string
+    cursor?: string
+    limit?: number
+    oldest?: string
+    latest?: string
+  }
+> = {
+  type: "function",
+  function: {
+    name: "get_messages_with_pagination",
+    description: "Get paginated message history with enhanced metadata including threading info, reactions, files, and user details for page UI",
+    parameters: {
+      type: "object",
+      properties: {
+        conversation_id: {
+          type: "string",
+          description: "Channel ID (e.g. C1234567890) or user ID for DM (e.g. U1234567890)",
+        },
+        cursor: {
+          type: "string",
+          description: "Pagination cursor for getting next/previous page of messages",
+        },
+        limit: {
+          type: "number",
+          description: "Number of messages per page (default: 50, max: 200)",
+        },
+        oldest: {
+          type: "string",
+          description: "Only messages after this timestamp (inclusive)",
+        },
+        latest: {
+          type: "string",
+          description: "Only messages before this timestamp (exclusive)",
+        },
+      },
+      required: ["conversation_id"],
+    },
+  },
+}
+
+/**
+ * Advanced message search with filters
+ */
+export const search_messages_advanced: AntispaceAppFunction<
+  "search_messages_advanced",
+  {
+    query: string
+    from_user?: string
+    in_channel?: string
+    date_from?: string
+    date_to?: string
+    has_files?: boolean
+    has_links?: boolean
+    message_type?: string
+    sort_by?: string
+    limit?: number
+  }
+> = {
+  type: "function",
+  function: {
+    name: "search_messages_advanced",
+    description: "Advanced message search with multiple filter parameters for precise results. Includes context around matches and relevance scoring.",
+    parameters: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description: "Search query text",
+        },
+        from_user: {
+          type: "string",
+          description: "Filter messages from specific user (user ID or @username)",
+        },
+        in_channel: {
+          type: "string",
+          description: "Filter messages from specific channel (channel ID or #channel-name)",
+        },
+        date_from: {
+          type: "string",
+          description: "Search messages after this date (YYYY-MM-DD format)",
+        },
+        date_to: {
+          type: "string",
+          description: "Search messages before this date (YYYY-MM-DD format)",
+        },
+        has_files: {
+          type: "boolean",
+          description: "If true, only return messages with file attachments",
+        },
+        has_links: {
+          type: "boolean",
+          description: "If true, only return messages with links",
+        },
+        message_type: {
+          type: "string",
+          description: "Filter by message type: 'text', 'file', or 'all' (default: all)",
+        },
+        sort_by: {
+          type: "string",
+          description: "Sort results by: 'timestamp' (default) or 'relevance'",
+        },
+        limit: {
+          type: "number",
+          description: "Number of results to return (default: 20, max: 100)",
+        },
+      },
+      required: ["query"],
+    },
+  },
+}
+
+/**
+ * Get full thread conversation
+ */
+export const get_thread_messages: AntispaceAppFunction<
+  "get_thread_messages",
+  {
+    conversation_id: string
+    thread_ts: string
+  }
+> = {
+  type: "function",
+  function: {
+    name: "get_thread_messages",
+    description: "Get all messages in a specific thread including the root message and all replies with participant info and reactions",
+    parameters: {
+      type: "object",
+      properties: {
+        conversation_id: {
+          type: "string",
+          description: "Channel ID (e.g. C1234567890) where the thread exists",
+        },
+        thread_ts: {
+          type: "string",
+          description: "Timestamp of the thread root message",
+        },
+      },
+      required: ["conversation_id", "thread_ts"],
+    },
+  },
+}
+
+/**
+ * Get all threads in a conversation
+ */
+export const get_conversation_threads: AntispaceAppFunction<
+  "get_conversation_threads",
+  {
+    conversation_id: string
+    include_read?: boolean
+    min_replies?: number
+    since?: string
+  }
+> = {
+  type: "function",
+  function: {
+    name: "get_conversation_threads",
+    description: "Get list of all thread conversations in a channel with metadata about replies, participants, and read status",
+    parameters: {
+      type: "object",
+      properties: {
+        conversation_id: {
+          type: "string",
+          description: "Channel ID (e.g. C1234567890) to get threads from",
+        },
+        include_read: {
+          type: "boolean",
+          description: "If true, include threads that have been read (default: true)",
+        },
+        min_replies: {
+          type: "number",
+          description: "Only return threads with at least this many replies (default: 1)",
+        },
+        since: {
+          type: "string",
+          description: "Only return threads created since this timestamp",
+        },
+      },
+      required: ["conversation_id"],
+    },
+  },
+}
