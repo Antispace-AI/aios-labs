@@ -1,7 +1,10 @@
 import type { AntispaceAIRequest } from "@antispace/sdk"
 import type manifest from "../manifest"
 import { getUser, updateUserTokens } from "../util"
-import { sendMessage, getConversations, getMessages, searchMessages, getUserInfo, getConversationInfo } from "../util/slack"
+import { sendMessage, getMessages } from "../util/slack/messaging"
+import { listConversations, getConversationDetails } from "../util/slack/conversations"
+import { searchMessages } from "../util/slack/search"
+import { getUserProfile } from "../util/slack/users"
 
 // Extracted handler modules for better separation of concerns
 import { handleAuthenticationActions } from './handlers/auth'
@@ -11,8 +14,6 @@ import { validateRequest } from './utils/validation'
 
 export default async function aiActions({ name, parameters, meta }: AntispaceAIRequest<typeof manifest>) {
   try {
-    console.log("🚀 AI Action called:", name)
-    
     // Validate request
     const validation = validateRequest({ name, parameters, meta })
     if (!validation.isValid) {
@@ -21,12 +22,10 @@ export default async function aiActions({ name, parameters, meta }: AntispaceAIR
 
     // Parse parameters with improved logic
     const parsedParams = parseParameters(parameters)
-    console.log("🎯 Final parsedParams:", parsedParams)
 
     // Get user data
     const userId = meta.user.id
     const user = await getUser(userId)
-    console.log("✅ Got user from database:", { id: user.id, hasToken: !!user.accessToken })
 
     // Route to appropriate handler
     if (isAuthenticationAction(name)) {

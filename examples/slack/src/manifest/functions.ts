@@ -1,7 +1,7 @@
 import type { AntispaceAppFunction } from "@antispace/sdk"
 
 /**
- * Send a message to a Slack channel or DM
+ * MSG-002: Send a message to a Slack channel or DM
  */
 export const send_message: AntispaceAppFunction<
   "send_message",
@@ -37,10 +37,10 @@ export const send_message: AntispaceAppFunction<
 }
 
 /**
- * Get list of accessible conversations
+ * CONV-001: List conversations
  */
-export const get_conversations: AntispaceAppFunction<
-  "get_conversations",
+export const list_conversations: AntispaceAppFunction<
+  "list_conversations",
   {
     types?: string
     limit?: number
@@ -48,8 +48,8 @@ export const get_conversations: AntispaceAppFunction<
 > = {
   type: "function",
   function: {
-    name: "get_conversations",
-    description: "Get list of Slack conversations (channels, DMs, groups) that the user has access to",
+    name: "list_conversations",
+    description: "List Slack conversations (channels, DMs, groups) that the user has access to",
     parameters: {
       type: "object",
       properties: {
@@ -68,7 +68,7 @@ export const get_conversations: AntispaceAppFunction<
 }
 
 /**
- * Get recent messages from a specific channel
+ * MSG-001: Get recent messages from a specific channel
  */
 export const get_messages: AntispaceAppFunction<
   "get_messages",
@@ -109,7 +109,7 @@ export const get_messages: AntispaceAppFunction<
 }
 
 /**
- * Search for messages across accessible channels
+ * SRCH-001: Search for messages across accessible channels
  */
 export const search_messages: AntispaceAppFunction<
   "search_messages",
@@ -145,18 +145,18 @@ export const search_messages: AntispaceAppFunction<
 }
 
 /**
- * Get user information by user ID
+ * USER-001: Get user profile by user ID
  */
-export const get_user_info: AntispaceAppFunction<
-  "get_user_info",
+export const get_user_profile: AntispaceAppFunction<
+  "get_user_profile",
   {
     user: string
   }
 > = {
   type: "function",
   function: {
-    name: "get_user_info",
-    description: "Get detailed information about a Slack user by their user ID",
+    name: "get_user_profile",
+    description: "Get detailed profile information about a Slack user by their user ID",
     parameters: {
       type: "object",
       properties: {
@@ -171,17 +171,17 @@ export const get_user_info: AntispaceAppFunction<
 }
 
 /**
- * Get detailed information about a conversation
+ * CONV-002: Get detailed information about a conversation
  */
-export const get_conversation_info: AntispaceAppFunction<
-  "get_conversation_info",
+export const get_conversation_details: AntispaceAppFunction<
+  "get_conversation_details",
   {
     channel: string
   }
 > = {
   type: "function",
   function: {
-    name: "get_conversation_info",
+    name: "get_conversation_details",
     description: "Get detailed information about a specific channel or conversation",
     parameters: {
       type: "object",
@@ -270,15 +270,15 @@ export const manual_auth: AntispaceAppFunction<
  */
 
 /**
- * Get total unread message count for widget display
+ * RT-001: Get total unread summary for widget display
  */
-export const get_total_unread_count: AntispaceAppFunction<
-  "get_total_unread_count",
+export const get_total_unread_summary: AntispaceAppFunction<
+  "get_total_unread_summary",
   {}
 > = {
   type: "function",
   function: {
-    name: "get_total_unread_count",
+    name: "get_total_unread_summary",
     description: "Get the total count of unread messages across all conversations, broken down by type (DMs, channels, mentions) for widget display",
     parameters: {
       type: "object",
@@ -289,7 +289,7 @@ export const get_total_unread_count: AntispaceAppFunction<
 }
 
 /**
- * Get recent unread messages for widget preview
+ * RT-002: Get recent unread messages for widget preview
  */
 export const get_recent_unread_messages: AntispaceAppFunction<
   "get_recent_unread_messages",
@@ -315,24 +315,24 @@ export const get_recent_unread_messages: AntispaceAppFunction<
 }
 
 /**
- * Mark a conversation as read
+ * RT-003: Mark a conversation as read
  */
-export const mark_conversation_read: AntispaceAppFunction<
-  "mark_conversation_read",
+export const mark_conversation_as_read: AntispaceAppFunction<
+  "mark_conversation_as_read",
   {
     conversation_id: string
   }
 > = {
   type: "function",
   function: {
-    name: "mark_conversation_read",
+    name: "mark_conversation_as_read",
     description: "Mark all messages in a specific conversation as read. Used when user opens a conversation from the widget.",
     parameters: {
       type: "object",
       properties: {
         conversation_id: {
           type: "string",
-          description: "Channel ID (e.g. C1234567890) or user ID for DM (e.g. U1234567890)",
+          description: "Conversation ID - for channels use C1234567890, for DMs use D1234567890 (NOT the user ID). Use the actual conversation ID from list_conversations or get_recent_unread_messages.",
         },
       },
       required: ["conversation_id"],

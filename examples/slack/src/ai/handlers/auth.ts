@@ -12,12 +12,9 @@ export async function handleAuthenticationActions(
   user: User,
   userId: string
 ): Promise<any> {
-  console.log("🔍 Handling authentication action:", name)
-
+  
   switch (name) {
     case "get_auth_url": {
-      console.log(`Generating OAuth URL for user ${userId}`)
-      
       // Instead of generating OAuth URL directly, redirect through our initiation endpoint
       // This ensures the userId cookie gets set properly
       const authInitUrl = `${BASE_URL}/authenticate-slack?userId=${encodeURIComponent(userId)}`
@@ -38,10 +35,7 @@ export async function handleAuthenticationActions(
     }
 
     case "check_auth_status": {
-      console.log(`✅ Starting check_auth_status for user ${userId}`)
-      
       if (!user.accessToken) {
-        console.log("❌ User has no access token")
         return {
           authenticated: false,
           message: "Not authenticated with Slack",
@@ -49,8 +43,7 @@ export async function handleAuthenticationActions(
         }
       }
 
-      console.log("🔑 User has access token, returning success")
-      const result = {
+      return {
         authenticated: true,
         message: "Successfully authenticated with Slack!",
         team_name: user.teamName || "Unknown",
@@ -60,18 +53,15 @@ export async function handleAuthenticationActions(
         token_preview: user.accessToken ? `${user.accessToken.substring(0, 12)}...` : "No token",
         next_steps: [
           "You can now use Slack functions like:",
-          "• get_conversations - List your channels and DMs",
+          "• list_conversations - List your channels and DMs",
           "• send_message - Send messages to channels",
           "• get_messages - Read message history"
         ]
       }
-      console.log("📤 Returning auth status result:", result)
-      return result
     }
 
     case "manual_auth": {
       const { access_token, team_name } = parsedParams as any
-      console.log(`Manual authentication for user ${userId}`)
       
       if (!access_token.startsWith("xoxp-") && !access_token.startsWith("xoxb-")) {
         return {
@@ -114,7 +104,7 @@ export async function handleAuthenticationActions(
           note: tokenType === "User Token" ? "Messages will be sent as your user account" : "Messages will be sent as bot",
           next_steps: [
             "Authentication complete! You can now use:",
-            "• get_conversations",
+            "• list_conversations",
             "• send_message", 
             "• get_messages",
             "• And other Slack functions"
@@ -130,7 +120,9 @@ export async function handleAuthenticationActions(
     }
 
     default: {
-      return { error: `Unknown authentication function: ${name}` }
+      return { 
+        error: `Unknown authentication function: ${name}` 
+      }
     }
   }
 } 

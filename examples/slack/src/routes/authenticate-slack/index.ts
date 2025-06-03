@@ -44,7 +44,12 @@ export default async function handler(c: Context) {
     "groups:history",
     "im:history",
     "mpim:history",
-    "chat:write"  // FIXED: User scope for sending messages as user
+    "chat:write",  // FIXED: User scope for sending messages as user
+    // Write scopes needed for marking conversations as read
+    "channels:write",  // For marking channels as read
+    "groups:write",    // For marking private channels as read
+    "im:write",        // For marking DMs as read
+    "mpim:write"       // For marking group DMs as read
   ].join(" ")
 
   // Construct Slack OAuth URL
