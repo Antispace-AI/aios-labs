@@ -350,7 +350,7 @@ export async function getRecentUnreadMessages(
 }
 
 /**
- * Placeholder for RT-004: Mark specific messages as read (Phase 2)
+ * Placeholder for RT-004: Mark specific messages as read (Phase 2C)
  */
 export async function markSpecificMessagesAsRead(
   user: User,
@@ -359,6 +359,6 @@ export async function markSpecificMessagesAsRead(
 ): Promise<any> {
   return {
     success: false,
-    error: 'markSpecificMessagesAsRead will be implemented in Phase 2'
+    error: 'markSpecificMessagesAsRead will be implemented in Phase 2C'
   }
 } 

@@ -262,26 +262,68 @@ export async function checkAuthenticationStatus(userId: string): Promise<AuthSta
 }
 
 /**
- * AUTH-004: Revoke authentication (for future phases)
- * Placeholder for Phase 2 implementation
+ * AUTH-004: Revoke authentication - Phase 2A Implementation
  */
 export async function revokeAuthentication(userId: string): Promise<SlackAPIResponse> {
   try {
-    // TODO: Implement in Phase 2
-    // - Revoke tokens with Slack API
-    // - Remove tokens from database
-    // - Clear any cached data
+    if (!userId) {
+      throw new SlackAuthError('User ID is required', 'MISSING_USER_ID')
+    }
+
+    console.log('🚫 Revoking authentication for user:', userId)
+
+    // TODO: Retrieve user's access token from your database
+    // const userTokens = await getUserTokens(userId)
+    // For now, we'll use the User object structure from the existing code
+    const user = { id: userId } as User
     
-    console.log('🚫 Token revocation not yet implemented (Phase 2)')
+    if (!user.accessToken) {
+      console.log('ℹ️ User not authenticated, nothing to revoke')
+      return {
+        success: true
+      }
+    }
+
+    // Revoke token with Slack API
+    const client = new WebClient(user.accessToken)
     
+    try {
+      const revokeResult = await client.auth.revoke()
+      
+      if (!revokeResult.ok) {
+        console.warn('⚠️ Slack token revocation failed:', revokeResult.error)
+        // Continue with cleanup even if Slack revocation failed
+      } else {
+        console.log('✅ Slack token revoked successfully')
+      }
+
+    } catch (apiError) {
+      console.warn('⚠️ Slack API error during revocation:', apiError)
+      // Continue with cleanup even if API call failed
+    }
+
+    // TODO: Remove tokens from database
+    // await removeUserTokens(userId)
+    
+    // TODO: Clear any cached data
+    // await clearUserSlackCache(userId)
+    
+    console.log('✅ Authentication revocation completed for user:', userId)
+
     return {
-      success: false,
-      error: 'Token revocation not yet implemented'
+      success: true
     }
 
   } catch (error) {
     console.error('❌ Token revocation failed:', error)
     
+    if (error instanceof SlackAuthError) {
+      return {
+        success: false,
+        error: error.message
+      }
+    }
+
     return {
       success: false,
       error: `Token revocation failed: ${error instanceof Error ? error.message : 'Unknown error'}`

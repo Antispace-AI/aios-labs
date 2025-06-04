@@ -41,7 +41,7 @@ export async function getUserProfile(user: User, userId: string) {
 }
 
 /**
- * Placeholder for USER-002: setUserStatus (Phase 2)
+ * Placeholder for USER-002: setUserStatus (Phase 2B)
  * Sets the user's Slack status and emoji
  */
 export async function setUserStatus(
@@ -50,30 +50,30 @@ export async function setUserStatus(
   statusEmoji: string, 
   expirationTs?: number
 ): Promise<SlackAPIResponse<{}>> {
-  // TODO: Implement in Phase 2
+  // TODO: Implement in Phase 2B
   return {
     success: false,
-    error: 'setUserStatus will be implemented in Phase 2'
+    error: 'setUserStatus will be implemented in Phase 2B'
   }
 }
 
 /**
- * Placeholder for USER-003: getUserPresence (Phase 2)
+ * Placeholder for USER-003: getUserPresence (Phase 2B)
  * Gets a user's current presence (active/away)
  */
 export async function getUserPresence(
   userId: string, 
   targetUserId: string
 ): Promise<SlackAPIResponse<{ presence: 'active' | 'away' | 'unknown', lastActivityTs?: number }>> {
-  // TODO: Implement in Phase 2
+  // TODO: Implement in Phase 2B
   return {
     success: false,
-    error: 'getUserPresence will be implemented in Phase 2'
+    error: 'getUserPresence will be implemented in Phase 2B'
   }
 }
 
 /**
- * Placeholder for USER-004: listUsers (Phase 3)
+ * Placeholder for USER-004: listUsers (Phase 2B)
  * Lists users in the workspace (paginated)
  */
 export async function listUsers(
@@ -81,9 +81,9 @@ export async function listUsers(
   limit?: number, 
   cursor?: string
 ): Promise<SlackAPIResponse<{ users: any[], nextPageCursor?: string }>> {
-  // TODO: Implement in Phase 3
+  // TODO: Implement in Phase 2B
   return {
     success: false,
-    error: 'listUsers will be implemented in Phase 3'
+    error: 'listUsers will be implemented in Phase 2B'
   }
 } 

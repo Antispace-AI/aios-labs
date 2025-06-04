@@ -168,12 +168,12 @@ export async function sendMessage(
         success: true,
         messageTs: result.ts,
         message: result.message ? {
-          ts: result.message.ts,
-          type: result.message.type,
-          user: result.message.user,
-          text: result.message.text,
-          thread_ts: result.message.thread_ts,
-          blocks: result.message.blocks
+          ts: (result.message as any).ts,
+          type: (result.message as any).type,
+          user: (result.message as any).user,
+          text: (result.message as any).text,
+          thread_ts: (result.message as any).thread_ts,
+          blocks: (result.message as any).blocks
         } as SlackMessage : undefined
       }
 
@@ -196,19 +196,182 @@ export async function sendMessage(
   }
 }
 
-// Placeholder functions for future phases
-export async function updateMessage(): Promise<any> {
-  return { success: false, error: 'updateMessage will be implemented in Phase 3' }
+// Phase 2A implementations
+/**
+ * MSG-003: updateMessage - Phase 2A Implementation
+ */
+export async function updateMessage(
+  user: User,
+  conversationId: string,
+  messageTs: string,
+  text?: string,
+  blocks?: any[]
+): Promise<{ success: boolean, message?: SlackMessage, error?: string }> {
+  try {
+    console.log('✏️ Updating message:', {
+      conversationId,
+      messageTs: `${messageTs.substring(0, 15)}...`,
+      hasText: !!text,
+      hasBlocks: !!blocks
+    })
+
+    validateUserAuth(user)
+    const client = clientPool.getClient(user.accessToken!)
+
+    return handleSlackResponse(async () => {
+      const updatePayload: any = {
+        channel: conversationId,
+        ts: messageTs
+      }
+
+      if (text) {
+        updatePayload.text = text
+      }
+
+      if (blocks && blocks.length > 0) {
+        updatePayload.blocks = blocks
+      }
+
+      const result = await client.chat.update(updatePayload)
+
+      if (!result.ok) {
+        throw new SlackAPIError(`Failed to update message: ${result.error}`, 'API_ERROR')
+      }
+
+      console.log(`✅ Message updated successfully: ${result.ts}`)
+
+      return {
+        success: true,
+        message: result.message ? {
+          ts: (result.message as any).ts,
+          type: (result.message as any).type,
+          user: (result.message as any).user,
+          text: (result.message as any).text,
+          thread_ts: (result.message as any).thread_ts,
+          blocks: (result.message as any).blocks
+        } as SlackMessage : undefined
+      }
+
+    }, 'updateMessage')
+
+  } catch (error) {
+    console.error('❌ Failed to update message:', error)
+    
+    if (error instanceof SlackAPIError) {
+      return {
+        success: false,
+        error: error.message
+      }
+    }
+
+    return {
+      success: false,
+      error: `Failed to update message: ${error instanceof Error ? error.message : 'Unknown error'}`
+    }
+  }
 }
 
-export async function deleteMessage(): Promise<any> {
-  return { success: false, error: 'deleteMessage will be implemented in Phase 3' }
+/**
+ * MSG-004: deleteMessage - Phase 2A Implementation
+ */
+export async function deleteMessage(
+  user: User,
+  conversationId: string,
+  messageTs: string
+): Promise<{ success: boolean, error?: string }> {
+  try {
+    console.log('🗑️ Deleting message:', {
+      conversationId,
+      messageTs: `${messageTs.substring(0, 15)}...`
+    })
+
+    validateUserAuth(user)
+    const client = clientPool.getClient(user.accessToken!)
+
+    return handleSlackResponse(async () => {
+      const result = await client.chat.delete({
+        channel: conversationId,
+        ts: messageTs
+      })
+
+      if (!result.ok) {
+        throw new SlackAPIError(`Failed to delete message: ${result.error}`, 'API_ERROR')
+      }
+
+      console.log(`✅ Message deleted successfully: ${messageTs}`)
+
+      return {
+        success: true
+      }
+
+    }, 'deleteMessage')
+
+  } catch (error) {
+    console.error('❌ Failed to delete message:', error)
+    
+    if (error instanceof SlackAPIError) {
+      return {
+        success: false,
+        error: error.message
+      }
+    }
+
+    return {
+      success: false,
+      error: `Failed to delete message: ${error instanceof Error ? error.message : 'Unknown error'}`
+    }
+  }
 }
 
-export async function sendEphemeralMessage(): Promise<any> {
-  return { success: false, error: 'sendEphemeralMessage will be implemented in Phase 3' }
-}
+/**
+ * MSG-006: getMessagePermalink - Phase 2A Implementation
+ */
+export async function getMessagePermalink(
+  user: User,
+  conversationId: string,
+  messageTs: string
+): Promise<{ success: boolean, permalink?: string, error?: string }> {
+  try {
+    console.log('🔗 Getting message permalink:', {
+      conversationId,
+      messageTs: `${messageTs.substring(0, 15)}...`
+    })
 
-export async function getMessagePermalink(): Promise<any> {
-  return { success: false, error: 'getMessagePermalink will be implemented in Phase 4' }
+    validateUserAuth(user)
+    const client = clientPool.getClient(user.accessToken!)
+
+    return handleSlackResponse(async () => {
+      const result = await client.chat.getPermalink({
+        channel: conversationId,
+        message_ts: messageTs
+      })
+
+      if (!result.ok) {
+        throw new SlackAPIError(`Failed to get message permalink: ${result.error}`, 'API_ERROR')
+      }
+
+      console.log(`✅ Got message permalink: ${result.permalink}`)
+
+      return {
+        success: true,
+        permalink: result.permalink
+      }
+
+    }, 'getMessagePermalink')
+
+  } catch (error) {
+    console.error('❌ Failed to get message permalink:', error)
+    
+    if (error instanceof SlackAPIError) {
+      return {
+        success: false,
+        error: error.message
+      }
+    }
+
+    return {
+      success: false,
+      error: `Failed to get message permalink: ${error instanceof Error ? error.message : 'Unknown error'}`
+    }
+  }
 } 

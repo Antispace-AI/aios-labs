@@ -3,6 +3,8 @@
  * 
  * Shared utilities for WebClient management, error handling, and response processing.
  * This consolidates code that was duplicated across multiple modules.
+ * 
+ * ⚠️  RATE LIMITING TEMPORARILY DISABLED FOR DEVELOPMENT ⚠️
  */
 
 import { WebClient } from '@slack/web-api'
@@ -28,6 +30,7 @@ enum CircuitState {
 
 /**
  * Circuit breaker for API endpoints
+ * ⚠️ TEMPORARILY DISABLED - Always allows operations through
  */
 class CircuitBreaker {
   private state = CircuitState.CLOSED
@@ -39,6 +42,11 @@ class CircuitBreaker {
   private halfOpenCalls = 0
 
   async execute<T>(operation: () => Promise<T>, operationName: string): Promise<T> {
+    // ⚠️ RATE LIMITING DISABLED: Circuit breaker bypassed for development
+    console.log(`🔧 DEV MODE: Circuit breaker bypassed for ${operationName}`)
+    return await operation()
+    
+    /* ORIGINAL CIRCUIT BREAKER LOGIC - COMMENTED OUT FOR DEV
     if (this.state === CircuitState.OPEN) {
       if (Date.now() - this.lastFailureTime > this.timeoutWindow) {
         this.state = CircuitState.HALF_OPEN
@@ -79,20 +87,27 @@ class CircuitBreaker {
       
       throw error
     }
+    */
   }
 }
 
 /**
  * Request queue for managing API call rates
+ * ⚠️ TEMPORARILY DISABLED - No delays or concurrency limits
  */
 class RequestQueue {
   private queue: Array<() => void> = []
   private processing = false
-  private readonly maxConcurrent = 10
-  private readonly rateLimitDelay = 1000 // 1 second between bursts
+  private readonly maxConcurrent = 999999 // ⚠️ DISABLED: Effectively unlimited
+  private readonly rateLimitDelay = 0 // ⚠️ DISABLED: No delay
   private activeCalls = 0
 
   async enqueue<T>(operation: () => Promise<T>): Promise<T> {
+    // ⚠️ RATE LIMITING DISABLED: Execute immediately without queuing
+    console.log(`🔧 DEV MODE: Request queue bypassed - executing immediately`)
+    return await operation()
+    
+    /* ORIGINAL QUEUE LOGIC - COMMENTED OUT FOR DEV
     return new Promise((resolve, reject) => {
       this.queue.push(async () => {
         try {
@@ -109,6 +124,7 @@ class RequestQueue {
       
       this.processNext()
     })
+    */
   }
 
   private processNext() {
@@ -217,13 +233,15 @@ export class SlackAPIError extends Error {
 
 /**
  * Enhanced error handling wrapper with retry logic and circuit breaker
+ * ⚠️ CIRCUIT BREAKER TEMPORARILY DISABLED
  */
 export async function handleSlackResponse<T>(
   operation: () => Promise<T>,
   operationName: string,
-  enableCircuitBreaker: boolean = true
+  enableCircuitBreaker: boolean = false // ⚠️ DISABLED: Changed default to false
 ): Promise<T> {
-  const circuitBreaker = enableCircuitBreaker ? clientPool.getCircuitBreaker(operationName) : null
+  // ⚠️ RATE LIMITING DISABLED: Circuit breaker bypassed
+  const circuitBreaker = false ? clientPool.getCircuitBreaker(operationName) : null
 
   const executeOperation = async (): Promise<T> => {
     try {
@@ -279,14 +297,17 @@ export const clientPool = new SlackClientPool()
 
 /**
  * Utility for batch processing with rate limiting
+ * ⚠️ DELAYS TEMPORARILY DISABLED
  */
 export async function processBatch<T, R>(
   items: T[],
   processor: (item: T) => Promise<R>,
-  batchSize: number = 5,
-  delayMs: number = 1000
+  batchSize: number = 50, // ⚠️ DISABLED: Increased batch size
+  delayMs: number = 0 // ⚠️ DISABLED: No delay
 ): Promise<R[]> {
   const results: R[] = []
+  
+  console.log(`🔧 DEV MODE: Batch processing with no delays (batchSize: ${batchSize})`)
   
   for (let i = 0; i < items.length; i += batchSize) {
     const batch = items.slice(i, i + batchSize)
@@ -297,10 +318,9 @@ export async function processBatch<T, R>(
       )
       results.push(...batchResults)
       
-      // Add delay between batches to respect rate limits
-      if (i + batchSize < items.length) {
-        await new Promise(resolve => setTimeout(resolve, delayMs))
-      }
+      // ⚠️ RATE LIMITING DISABLED: No delay between batches
+      // Original code: await new Promise(resolve => setTimeout(resolve, delayMs))
+      
     } catch (error) {
       console.warn(`Batch processing failed for batch starting at index ${i}:`, error)
       // Continue with next batch instead of failing entirely

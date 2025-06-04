@@ -216,15 +216,288 @@ function getConversationDisplayName(conversation: any): string {
 }
 
 /**
- * Placeholder for CONV-003: getConversationMembers (Phase 2)
+ * CONV-003: getConversationMembers - Phase 2A Implementation
  */
 export async function getConversationMembers(
   user: User, 
+  conversationId: string,
+  limit?: number,
+  cursor?: string
+): Promise<{ success: boolean, members: any[], nextPageCursor?: string, error?: string }> {
+  try {
+    console.log('👥 Getting conversation members:', {
+      conversationId,
+      limit,
+      cursor: cursor ? `${cursor.substring(0, 20)}...` : undefined
+    })
+
+    validateUserAuth(user)
+    const client = clientPool.getClient(user.accessToken!)
+
+    return handleSlackResponse(async () => {
+      const result = await client.conversations.members({
+        channel: conversationId,
+        limit: limit || 100,
+        cursor
+      })
+
+      if (!result.ok) {
+        throw new SlackAPIError(`Failed to get conversation members: ${result.error}`, 'API_ERROR')
+      }
+
+      const memberIds = result.members || []
+
+      // Get user details for each member (batch processing for efficiency)
+      const members: any[] = []
+      
+      for (const userId of memberIds) {
+        try {
+          const userInfo = await client.users.info({ user: userId })
+          if (userInfo.ok && userInfo.user) {
+            const slackUser = userInfo.user as any
+            members.push({
+              id: slackUser.id,
+              name: slackUser.name,
+              real_name: slackUser.real_name,
+              display_name: slackUser.profile?.display_name || slackUser.real_name || slackUser.name,
+              email: slackUser.profile?.email,
+              image_24: slackUser.profile?.image_24,
+              image_32: slackUser.profile?.image_32,
+              image_48: slackUser.profile?.image_48,
+              image_72: slackUser.profile?.image_72,
+              image_192: slackUser.profile?.image_192,
+              is_bot: slackUser.is_bot,
+              is_app_user: slackUser.is_app_user,
+              deleted: slackUser.deleted,
+              is_restricted: slackUser.is_restricted,
+              is_ultra_restricted: slackUser.is_ultra_restricted
+            })
+          }
+        } catch (userError) {
+          console.warn(`Failed to get user info for ${userId}:`, userError)
+          // Add basic info even if user details fail
+          members.push({
+            id: userId,
+            name: `Unknown User ${userId}`,
+            display_name: `Unknown User ${userId}`,
+            deleted: false
+          })
+        }
+      }
+
+      console.log(`✅ Retrieved ${members.length} conversation members`)
+
+      return {
+        success: true,
+        members,
+        nextPageCursor: result.response_metadata?.next_cursor
+      }
+
+    }, 'getConversationMembers')
+
+  } catch (error) {
+    console.error('❌ Failed to get conversation members:', error)
+    
+    if (error instanceof SlackAPIError) {
+      return {
+        success: false,
+        members: [],
+        error: error.message
+      }
+    }
+
+    return {
+      success: false,
+      members: [],
+      error: `Failed to get conversation members: ${error instanceof Error ? error.message : 'Unknown error'}`
+    }
+  }
+}
+
+/**
+ * CONV-004: createConversation - Phase 2A Implementation
+ */
+export async function createConversation(
+  user: User,
+  name: string,
+  isPrivate: boolean,
+  memberUserIds?: string
+): Promise<{ success: boolean, conversation?: any, error?: string }> {
+  try {
+    console.log('🆕 Creating conversation:', {
+      name,
+      isPrivate,
+      memberUserIds
+    })
+
+    validateUserAuth(user)
+    const client = clientPool.getClient(user.accessToken!)
+
+    return handleSlackResponse(async () => {
+      const result = await client.conversations.create({
+        name,
+        is_private: isPrivate
+      })
+
+      if (!result.ok) {
+        throw new SlackAPIError(`Failed to create conversation: ${result.error}`, 'API_ERROR')
+      }
+
+      const conversation = result.channel
+
+      // If member IDs provided and it's a private channel, invite them
+      if (memberUserIds && memberUserIds.trim() && conversation?.id) {
+        try {
+          await client.conversations.invite({
+            channel: conversation.id,
+            users: memberUserIds // memberUserIds is already a comma-separated string
+          })
+          console.log(`✅ Invited users to conversation: ${memberUserIds}`)
+        } catch (inviteError) {
+          console.warn('⚠️ Failed to invite some users:', inviteError)
+          // Don't fail the creation if invites fail
+        }
+      }
+
+      console.log(`✅ Created conversation: ${conversation?.name} (${conversation?.id})`)
+
+      return {
+        success: true,
+        conversation: {
+          id: conversation?.id,
+          name: conversation?.name,
+          is_private: conversation?.is_private,
+          is_member: conversation?.is_member,
+          created: conversation?.created,
+          creator: conversation?.creator,
+          purpose: conversation?.purpose ? {
+            value: conversation.purpose.value || '',
+            creator: conversation.purpose.creator || '',
+            last_set: conversation.purpose.last_set || 0
+          } : undefined,
+          topic: conversation?.topic ? {
+            value: conversation.topic.value || '',
+            creator: conversation.topic.creator || '',
+            last_set: conversation.topic.last_set || 0
+          } : undefined
+        }
+      }
+
+    }, 'createConversation')
+
+  } catch (error) {
+    console.error('❌ Failed to create conversation:', error)
+    
+    if (error instanceof SlackAPIError) {
+      return {
+        success: false,
+        error: error.message
+      }
+    }
+
+    return {
+      success: false,
+      error: `Failed to create conversation: ${error instanceof Error ? error.message : 'Unknown error'}`
+    }
+  }
+}
+
+/**
+ * CONV-009: joinConversation - Phase 2A Implementation
+ */
+export async function joinConversation(
+  user: User,
   conversationId: string
-): Promise<any> {
-  console.log('🚧 getConversationMembers not yet implemented (Phase 2)')
-  return {
-    success: false,
-    error: 'Function not yet implemented'
+): Promise<{ success: boolean, conversation?: any, error?: string }> {
+  try {
+    console.log('🔗 Joining conversation:', conversationId)
+
+    validateUserAuth(user)
+    const client = clientPool.getClient(user.accessToken!)
+
+    return handleSlackResponse(async () => {
+      const result = await client.conversations.join({
+        channel: conversationId
+      })
+
+      if (!result.ok) {
+        throw new SlackAPIError(`Failed to join conversation: ${result.error}`, 'API_ERROR')
+      }
+
+      console.log(`✅ Successfully joined conversation: ${conversationId}`)
+
+      return {
+        success: true,
+        conversation: result.channel ? {
+          id: result.channel.id,
+          name: result.channel.name,
+          is_private: result.channel.is_private,
+          is_member: result.channel.is_member
+        } : undefined
+      }
+
+    }, 'joinConversation')
+
+  } catch (error) {
+    console.error('❌ Failed to join conversation:', error)
+    
+    if (error instanceof SlackAPIError) {
+      return {
+        success: false,
+        error: error.message
+      }
+    }
+
+    return {
+      success: false,
+      error: `Failed to join conversation: ${error instanceof Error ? error.message : 'Unknown error'}`
+    }
+  }
+}
+
+/**
+ * CONV-010: leaveConversation - Phase 2A Implementation
+ */
+export async function leaveConversation(
+  user: User,
+  conversationId: string
+): Promise<{ success: boolean, error?: string }> {
+  try {
+    console.log('👋 Leaving conversation:', conversationId)
+
+    validateUserAuth(user)
+    const client = clientPool.getClient(user.accessToken!)
+
+    return handleSlackResponse(async () => {
+      const result = await client.conversations.leave({
+        channel: conversationId
+      })
+
+      if (!result.ok) {
+        throw new SlackAPIError(`Failed to leave conversation: ${result.error}`, 'API_ERROR')
+      }
+
+      console.log(`✅ Successfully left conversation: ${conversationId}`)
+
+      return {
+        success: true
+      }
+
+    }, 'leaveConversation')
+
+  } catch (error) {
+    console.error('❌ Failed to leave conversation:', error)
+    
+    if (error instanceof SlackAPIError) {
+      return {
+        success: false,
+        error: error.message
+      }
+    }
+
+    return {
+      success: false,
+      error: `Failed to leave conversation: ${error instanceof Error ? error.message : 'Unknown error'}`
+    }
   }
 } 

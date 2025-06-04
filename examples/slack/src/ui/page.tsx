@@ -14,7 +14,7 @@ export default async function pageUI(anti: AntispaceContext<SlackUIActions>) {
   console.log({ action, values, meta })
 
   // Handle logout action directly
-  if (action === "logout_slack") {
+  if (action === "logoutSlack") {
     // Clear tokens immediately
     const success = await clearUserTokens(userId)
     
@@ -90,7 +90,7 @@ export default async function pageUI(anti: AntispaceContext<SlackUIActions>) {
       <Anti.Row justify="space-between" align="center">
         <Anti.Text type="heading2">Account Status: Connected ✅</Anti.Text>
         <Anti.Button 
-          action="logout_slack" 
+          action="logoutSlack" 
           text="Disconnect Account"
           size="small"
         />

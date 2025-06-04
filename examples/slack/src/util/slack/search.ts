@@ -42,7 +42,7 @@ export async function searchMessages(user: User, query: string, limit: number = 
 }
 
 /**
- * Placeholder for advanced search with filters (Phase 2)
+ * Placeholder for advanced search with filters (Phase 2B)
  * Searches messages across conversations with advanced filters
  */
 export async function searchMessagesAdvanced(
@@ -59,9 +59,9 @@ export async function searchMessagesAdvanced(
     page?: number
   }
 ): Promise<SlackAPIResponse<{ messages: any[], totalResults?: number }>> {
-  // TODO: Implement in Phase 2
+  // TODO: Implement in Phase 2B
   return {
     success: false,
-    error: 'searchMessagesAdvanced will be implemented in Phase 2'
+    error: 'searchMessagesAdvanced will be implemented in Phase 2B'
   }
 } 
