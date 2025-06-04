@@ -18,13 +18,13 @@ export async function handleSlackActions(
   
   switch (name) {
     // MSG-002: sendMessage
-    case "send_message": {
-      const { channel, text, thread_ts } = parsedParams as any
-      return await sendMessage(user, channel, text, undefined, thread_ts)
+    case "sendMessage": {
+      const { channel, text, threadTs } = parsedParams as any
+      return await sendMessage(user, channel, text, undefined, threadTs)
     }
 
     // CONV-001: listConversations
-    case "list_conversations": {
+    case "listConversations": {
       try {
         return await listConversations(user)
       } catch (error: any) {
@@ -37,44 +37,44 @@ export async function handleSlackActions(
     }
 
     // MSG-001: getMessages
-    case "get_messages": {
+    case "getMessages": {
       const { channel, limit = 20 } = parsedParams as any
       return await getMessages(user, channel, limit)
     }
 
     // SRCH-001: searchMessages
-    case "search_messages": {
+    case "searchMessages": {
       const { query, count = 20 } = parsedParams as any
       return await searchMessages(user, query, count)
     }
 
     // USER-001: getUserProfile
-    case "get_user_profile": {
+    case "getUserProfile": {
       const { user: userId } = parsedParams as any
       return await getUserProfile(user, userId)
     }
 
     // CONV-002: getConversationDetails
-    case "get_conversation_details": {
+    case "getConversationDetails": {
       const { channel } = parsedParams as any
       return await getConversationDetails(user, channel)
     }
 
     // RT-001: getTotalUnreadSummary
-    case "get_total_unread_summary": {
+    case "getTotalUnreadSummary": {
       return await getTotalUnreadSummary(user)
     }
 
     // RT-002: getRecentUnreadMessages
-    case "get_recent_unread_messages": {
+    case "getRecentUnreadMessages": {
       const { limit = 10 } = parsedParams as any
       return await getRecentUnreadMessages(user, limit)
     }
 
     // RT-003: markConversationAsRead
-    case "mark_conversation_as_read": {
-      const { conversation_id, latest_ts } = parsedParams as any
-      return await markConversationAsRead(user, conversation_id, latest_ts)
+    case "markConversationAsRead": {
+      const { conversationId, latestTs } = parsedParams as any
+      return await markConversationAsRead(user, conversationId, latestTs)
     }
 
     default: {

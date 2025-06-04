@@ -14,7 +14,7 @@ export async function handleAuthenticationActions(
 ): Promise<any> {
   
   switch (name) {
-    case "get_auth_url": {
+    case "getAuthUrl": {
       // Instead of generating OAuth URL directly, redirect through our initiation endpoint
       // This ensures the userId cookie gets set properly
       const authInitUrl = `${BASE_URL}/authenticate-slack?userId=${encodeURIComponent(userId)}`
@@ -27,19 +27,19 @@ export async function handleAuthenticationActions(
           "2. You'll be automatically redirected to Slack for authorization",
           "3. Select your Slack workspace and click 'Allow'", 
           "4. You'll be redirected back automatically",
-          "5. Use 'check_auth_status' to verify authentication worked"
+          "5. Use 'checkAuthStatus' to verify authentication worked"
         ],
         note: IS_PRODUCTION ? "🔒 Using HTTPS for production" : "🔧 Using HTTP for development",
         technical_note: "This URL will set necessary cookies and then redirect you to Slack"
       }
     }
 
-    case "check_auth_status": {
+    case "checkAuthStatus": {
       if (!user.accessToken) {
         return {
           authenticated: false,
           message: "Not authenticated with Slack",
-          next_step: "Use 'get_auth_url' to get authentication URL, or 'manual_auth' with a bot token"
+          next_step: "Use 'getAuthUrl' to get authentication URL, or 'manualAuth' with a bot token"
         }
       }
 
@@ -53,17 +53,17 @@ export async function handleAuthenticationActions(
         token_preview: user.accessToken ? `${user.accessToken.substring(0, 12)}...` : "No token",
         next_steps: [
           "You can now use Slack functions like:",
-          "• list_conversations - List your channels and DMs",
-          "• send_message - Send messages to channels",
-          "• get_messages - Read message history"
+          "• listConversations - List your channels and DMs",
+          "• sendMessage - Send messages to channels",
+          "• getMessages - Read message history"
         ]
       }
     }
 
-    case "manual_auth": {
-      const { access_token, team_name } = parsedParams as any
+    case "manualAuth": {
+      const { accessToken, teamName } = parsedParams as any
       
-      if (!access_token.startsWith("xoxp-") && !access_token.startsWith("xoxb-")) {
+      if (!accessToken.startsWith("xoxp-") && !accessToken.startsWith("xoxb-")) {
         return {
           error: "Invalid token format", 
           message: "Slack tokens should start with 'xoxp-' (user token) or 'xoxb-' (bot token)",
@@ -73,7 +73,7 @@ export async function handleAuthenticationActions(
 
       try {
         // Test the token by making a simple API call
-        const testClient = new (await import("@slack/web-api")).WebClient(access_token)
+        const testClient = new (await import("@slack/web-api")).WebClient(accessToken)
         const authTest = await testClient.auth.test()
         
         if (!authTest.ok) {
@@ -83,15 +83,15 @@ export async function handleAuthenticationActions(
         // Update user with token info
         await updateUserTokens(
           userId,
-          access_token,
+          accessToken,
           undefined, // no refresh token for manual auth
           authTest.team_id,
-          team_name || authTest.team,
+          teamName || authTest.team,
           authTest.user_id,
           authTest.user
         )
 
-        const tokenType = access_token.startsWith("xoxp-") ? "User Token" : "Bot Token"
+        const tokenType = accessToken.startsWith("xoxp-") ? "User Token" : "Bot Token"
 
         return {
           success: true,
@@ -104,9 +104,9 @@ export async function handleAuthenticationActions(
           note: tokenType === "User Token" ? "Messages will be sent as your user account" : "Messages will be sent as bot",
           next_steps: [
             "Authentication complete! You can now use:",
-            "• list_conversations",
-            "• send_message", 
-            "• get_messages",
+            "• listConversations",
+            "• sendMessage", 
+            "• getMessages",
             "• And other Slack functions"
           ]
         }

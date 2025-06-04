@@ -37,7 +37,7 @@ export default async function aiActions({ name, parameters, meta }: AntispaceAIR
       return {
         error: "Not authenticated with Slack",
         action: "authenticate",
-        message: "Please connect your Slack account first. Use 'get_auth_url' to get the authentication URL, or 'manual_auth' with a bot token."
+        message: "Please connect your Slack account first. Use 'getAuthUrl' to get the authentication URL, or 'manualAuth' with a bot token."
       }
     }
 
@@ -54,5 +54,5 @@ export default async function aiActions({ name, parameters, meta }: AntispaceAIR
 }
 
 function isAuthenticationAction(name: string): boolean {
-  return ['get_auth_url', 'check_auth_status', 'manual_auth'].includes(name)
+  return ['getAuthUrl', 'checkAuthStatus', 'manualAuth'].includes(name)
 }

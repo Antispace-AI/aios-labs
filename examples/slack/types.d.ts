@@ -3,10 +3,10 @@ export type MyAppUIActions = {
 }
 
 export type SlackUIActions = {
-  send_message: { channel: string; message: string; thread_ts?: string }
-  select_conversation: { channel: string }
-  refresh_conversations: {}
-  refresh_messages: { channel: string }
-  logout_slack: {}
-  check_auth_status: {}
+  sendMessage: { channel: string; message: string; threadTs?: string }
+  selectConversation: { channel: string }
+  refreshConversations: {}
+  refreshMessages: { channel: string }
+  logoutSlack: {}
+  checkAuthStatus: {}
 }

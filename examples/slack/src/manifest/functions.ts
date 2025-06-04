@@ -3,17 +3,17 @@ import type { AntispaceAppFunction } from "@antispace/sdk"
 /**
  * MSG-002: Send a message to a Slack channel or DM
  */
-export const send_message: AntispaceAppFunction<
-  "send_message",
+export const sendMessage: AntispaceAppFunction<
+  "sendMessage",
   {
     channel: string
     text: string
-    thread_ts?: string
+    threadTs?: string
   }
 > = {
   type: "function",
   function: {
-    name: "send_message",
+    name: "sendMessage",
     description: "Send a message to a Slack channel, DM, or group. Can optionally reply in a thread.",
     parameters: {
       type: "object",
@@ -26,7 +26,7 @@ export const send_message: AntispaceAppFunction<
           type: "string",
           description: "Message text to send. Supports Slack markdown formatting.",
         },
-        thread_ts: {
+        threadTs: {
           type: "string",
           description: "Optional timestamp of parent message to reply in thread",
         },
@@ -39,8 +39,8 @@ export const send_message: AntispaceAppFunction<
 /**
  * CONV-001: List conversations
  */
-export const list_conversations: AntispaceAppFunction<
-  "list_conversations",
+export const listConversations: AntispaceAppFunction<
+  "listConversations",
   {
     types?: string
     limit?: number
@@ -48,7 +48,7 @@ export const list_conversations: AntispaceAppFunction<
 > = {
   type: "function",
   function: {
-    name: "list_conversations",
+    name: "listConversations",
     description: "List Slack conversations (channels, DMs, groups) that the user has access to",
     parameters: {
       type: "object",
@@ -70,8 +70,8 @@ export const list_conversations: AntispaceAppFunction<
 /**
  * MSG-001: Get recent messages from a specific channel
  */
-export const get_messages: AntispaceAppFunction<
-  "get_messages",
+export const getMessages: AntispaceAppFunction<
+  "getMessages",
   {
     channel: string
     limit?: number
@@ -81,7 +81,7 @@ export const get_messages: AntispaceAppFunction<
 > = {
   type: "function",
   function: {
-    name: "get_messages",
+    name: "getMessages",
     description: "Fetch recent messages from a specific Slack channel or DM",
     parameters: {
       type: "object",
@@ -111,8 +111,8 @@ export const get_messages: AntispaceAppFunction<
 /**
  * SRCH-001: Search for messages across accessible channels
  */
-export const search_messages: AntispaceAppFunction<
-  "search_messages",
+export const searchMessages: AntispaceAppFunction<
+  "searchMessages",
   {
     query: string
     sort?: string
@@ -121,7 +121,7 @@ export const search_messages: AntispaceAppFunction<
 > = {
   type: "function",
   function: {
-    name: "search_messages",
+    name: "searchMessages",
     description: "Search for messages across all accessible Slack channels and DMs",
     parameters: {
       type: "object",
@@ -147,15 +147,15 @@ export const search_messages: AntispaceAppFunction<
 /**
  * USER-001: Get user profile by user ID
  */
-export const get_user_profile: AntispaceAppFunction<
-  "get_user_profile",
+export const getUserProfile: AntispaceAppFunction<
+  "getUserProfile",
   {
     user: string
   }
 > = {
   type: "function",
   function: {
-    name: "get_user_profile",
+    name: "getUserProfile",
     description: "Get detailed profile information about a Slack user by their user ID",
     parameters: {
       type: "object",
@@ -173,15 +173,15 @@ export const get_user_profile: AntispaceAppFunction<
 /**
  * CONV-002: Get detailed information about a conversation
  */
-export const get_conversation_details: AntispaceAppFunction<
-  "get_conversation_details",
+export const getConversationDetails: AntispaceAppFunction<
+  "getConversationDetails",
   {
     channel: string
   }
 > = {
   type: "function",
   function: {
-    name: "get_conversation_details",
+    name: "getConversationDetails",
     description: "Get detailed information about a specific channel or conversation",
     parameters: {
       type: "object",
@@ -199,13 +199,13 @@ export const get_conversation_details: AntispaceAppFunction<
 /**
  * Get Slack OAuth authentication URL
  */
-export const get_auth_url: AntispaceAppFunction<
-  "get_auth_url",
+export const getAuthUrl: AntispaceAppFunction<
+  "getAuthUrl",
   {}
 > = {
   type: "function",
   function: {
-    name: "get_auth_url",
+    name: "getAuthUrl",
     description: "Get the Slack OAuth URL to authenticate your account. Visit this URL in your browser to connect your Slack workspace.",
     parameters: {
       type: "object",
@@ -218,13 +218,13 @@ export const get_auth_url: AntispaceAppFunction<
 /**
  * Check current authentication status
  */
-export const check_auth_status: AntispaceAppFunction<
-  "check_auth_status",
+export const checkAuthStatus: AntispaceAppFunction<
+  "checkAuthStatus",
   {}
 > = {
   type: "function",
   function: {
-    name: "check_auth_status",
+    name: "checkAuthStatus",
     description: "Check if your Slack account is currently authenticated and get basic info about your connected workspace.",
     parameters: {
       type: "object",
@@ -237,30 +237,30 @@ export const check_auth_status: AntispaceAppFunction<
 /**
  * Manual authentication with token (for testing)
  */
-export const manual_auth: AntispaceAppFunction<
-  "manual_auth",
+export const manualAuth: AntispaceAppFunction<
+  "manualAuth",
   {
-    access_token: string
-    team_name?: string
+    accessToken: string
+    teamName?: string
   }
 > = {
   type: "function",
   function: {
-    name: "manual_auth",
+    name: "manualAuth",
     description: "Manually authenticate with a Slack bot token (for testing purposes). Use this only if you have a bot token from your Slack app settings.",
     parameters: {
       type: "object",
       properties: {
-        access_token: {
+        accessToken: {
           type: "string",
           description: "Slack bot token (starts with xoxb-)",
         },
-        team_name: {
+        teamName: {
           type: "string",
           description: "Optional team/workspace name for display purposes",
         },
       },
-      required: ["access_token"],
+      required: ["accessToken"],
     },
   },
 }
@@ -272,13 +272,13 @@ export const manual_auth: AntispaceAppFunction<
 /**
  * RT-001: Get total unread summary for widget display
  */
-export const get_total_unread_summary: AntispaceAppFunction<
-  "get_total_unread_summary",
+export const getTotalUnreadSummary: AntispaceAppFunction<
+  "getTotalUnreadSummary",
   {}
 > = {
   type: "function",
   function: {
-    name: "get_total_unread_summary",
+    name: "getTotalUnreadSummary",
     description: "Get the total count of unread messages across all conversations, broken down by type (DMs, channels, mentions) for widget display",
     parameters: {
       type: "object",
@@ -291,15 +291,15 @@ export const get_total_unread_summary: AntispaceAppFunction<
 /**
  * RT-002: Get recent unread messages for widget preview
  */
-export const get_recent_unread_messages: AntispaceAppFunction<
-  "get_recent_unread_messages",
+export const getRecentUnreadMessages: AntispaceAppFunction<
+  "getRecentUnreadMessages",
   {
     limit?: number
   }
 > = {
   type: "function",
   function: {
-    name: "get_recent_unread_messages",
+    name: "getRecentUnreadMessages",
     description: "Get the most recent unread messages for widget preview display. Shows message previews with sender info and conversation context.",
     parameters: {
       type: "object",
@@ -317,245 +317,57 @@ export const get_recent_unread_messages: AntispaceAppFunction<
 /**
  * RT-003: Mark a conversation as read
  */
-export const mark_conversation_as_read: AntispaceAppFunction<
-  "mark_conversation_as_read",
+export const markConversationAsRead: AntispaceAppFunction<
+  "markConversationAsRead",
   {
-    conversation_id: string
+    conversationId: string
   }
 > = {
   type: "function",
   function: {
-    name: "mark_conversation_as_read",
+    name: "markConversationAsRead",
     description: "Mark all messages in a specific conversation as read. Used when user opens a conversation from the widget.",
     parameters: {
       type: "object",
       properties: {
-        conversation_id: {
+        conversationId: {
           type: "string",
-          description: "Conversation ID - for channels use C1234567890, for DMs use D1234567890 (NOT the user ID). Use the actual conversation ID from list_conversations or get_recent_unread_messages.",
+          description: "Conversation ID - for channels use C1234567890, for DMs use D1234567890 (NOT the user ID). Use the actual conversation ID from listConversations or getRecentUnreadMessages.",
         },
       },
-      required: ["conversation_id"],
+      required: ["conversationId"],
     },
   },
 }
 
 /**
- * PHASE 1 FUNCTIONS - Page UI Functions
+ * CONV-012: Get all threads in a conversation
  */
-
-/**
- * Get conversations with enhanced metadata for page UI
- */
-export const get_conversations_with_metadata: AntispaceAppFunction<
-  "get_conversations_with_metadata",
+export const getConversationThreads: AntispaceAppFunction<
+  "getConversationThreads",
   {
-    type?: string
-    unread_only?: boolean
-    active_since?: string
-  }
-> = {
-  type: "function",
-  function: {
-    name: "get_conversations_with_metadata",
-    description: "Get list of conversations with enhanced metadata including unread counts, activity status, member counts, and more for page UI display",
-    parameters: {
-      type: "object",
-      properties: {
-        type: {
-          type: "string",
-          description: "Filter by conversation type: 'dm', 'channel', 'group', or 'all' (default: all)",
-        },
-        unread_only: {
-          type: "boolean",
-          description: "If true, only return conversations with unread messages (default: false)",
-        },
-        active_since: {
-          type: "string",
-          description: "Only return conversations active since this timestamp (ISO format)",
-        },
-      },
-      required: [],
-    },
-  },
-}
-
-/**
- * Get messages with pagination for page UI
- */
-export const get_messages_with_pagination: AntispaceAppFunction<
-  "get_messages_with_pagination",
-  {
-    conversation_id: string
-    cursor?: string
-    limit?: number
-    oldest?: string
-    latest?: string
-  }
-> = {
-  type: "function",
-  function: {
-    name: "get_messages_with_pagination",
-    description: "Get paginated message history with enhanced metadata including threading info, reactions, files, and user details for page UI",
-    parameters: {
-      type: "object",
-      properties: {
-        conversation_id: {
-          type: "string",
-          description: "Channel ID (e.g. C1234567890) or user ID for DM (e.g. U1234567890)",
-        },
-        cursor: {
-          type: "string",
-          description: "Pagination cursor for getting next/previous page of messages",
-        },
-        limit: {
-          type: "number",
-          description: "Number of messages per page (default: 50, max: 200)",
-        },
-        oldest: {
-          type: "string",
-          description: "Only messages after this timestamp (inclusive)",
-        },
-        latest: {
-          type: "string",
-          description: "Only messages before this timestamp (exclusive)",
-        },
-      },
-      required: ["conversation_id"],
-    },
-  },
-}
-
-/**
- * Advanced message search with filters
- */
-export const search_messages_advanced: AntispaceAppFunction<
-  "search_messages_advanced",
-  {
-    query: string
-    from_user?: string
-    in_channel?: string
-    date_from?: string
-    date_to?: string
-    has_files?: boolean
-    has_links?: boolean
-    message_type?: string
-    sort_by?: string
-    limit?: number
-  }
-> = {
-  type: "function",
-  function: {
-    name: "search_messages_advanced",
-    description: "Advanced message search with multiple filter parameters for precise results. Includes context around matches and relevance scoring.",
-    parameters: {
-      type: "object",
-      properties: {
-        query: {
-          type: "string",
-          description: "Search query text",
-        },
-        from_user: {
-          type: "string",
-          description: "Filter messages from specific user (user ID or @username)",
-        },
-        in_channel: {
-          type: "string",
-          description: "Filter messages from specific channel (channel ID or #channel-name)",
-        },
-        date_from: {
-          type: "string",
-          description: "Search messages after this date (YYYY-MM-DD format)",
-        },
-        date_to: {
-          type: "string",
-          description: "Search messages before this date (YYYY-MM-DD format)",
-        },
-        has_files: {
-          type: "boolean",
-          description: "If true, only return messages with file attachments",
-        },
-        has_links: {
-          type: "boolean",
-          description: "If true, only return messages with links",
-        },
-        message_type: {
-          type: "string",
-          description: "Filter by message type: 'text', 'file', or 'all' (default: all)",
-        },
-        sort_by: {
-          type: "string",
-          description: "Sort results by: 'timestamp' (default) or 'relevance'",
-        },
-        limit: {
-          type: "number",
-          description: "Number of results to return (default: 20, max: 100)",
-        },
-      },
-      required: ["query"],
-    },
-  },
-}
-
-/**
- * Get full thread conversation
- */
-export const get_thread_messages: AntispaceAppFunction<
-  "get_thread_messages",
-  {
-    conversation_id: string
-    thread_ts: string
-  }
-> = {
-  type: "function",
-  function: {
-    name: "get_thread_messages",
-    description: "Get all messages in a specific thread including the root message and all replies with participant info and reactions",
-    parameters: {
-      type: "object",
-      properties: {
-        conversation_id: {
-          type: "string",
-          description: "Channel ID (e.g. C1234567890) where the thread exists",
-        },
-        thread_ts: {
-          type: "string",
-          description: "Timestamp of the thread root message",
-        },
-      },
-      required: ["conversation_id", "thread_ts"],
-    },
-  },
-}
-
-/**
- * Get all threads in a conversation
- */
-export const get_conversation_threads: AntispaceAppFunction<
-  "get_conversation_threads",
-  {
-    conversation_id: string
-    include_read?: boolean
-    min_replies?: number
+    conversationId: string
+    includeRead?: boolean
+    minReplies?: number
     since?: string
   }
 > = {
   type: "function",
   function: {
-    name: "get_conversation_threads",
+    name: "getConversationThreads",
     description: "Get list of all thread conversations in a channel with metadata about replies, participants, and read status",
     parameters: {
       type: "object",
       properties: {
-        conversation_id: {
+        conversationId: {
           type: "string",
           description: "Channel ID (e.g. C1234567890) to get threads from",
         },
-        include_read: {
+        includeRead: {
           type: "boolean",
           description: "If true, include threads that have been read (default: true)",
         },
-        min_replies: {
+        minReplies: {
           type: "number",
           description: "Only return threads with at least this many replies (default: 1)",
         },
@@ -564,7 +376,7 @@ export const get_conversation_threads: AntispaceAppFunction<
           description: "Only return threads created since this timestamp",
         },
       },
-      required: ["conversation_id"],
+      required: ["conversationId"],
     },
   },
 }

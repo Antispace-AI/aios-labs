@@ -48,4 +48,11 @@ export function validateFunctionName(name: string): boolean {
   ]
   
   return validFunctions.includes(name)
-} 
+}
+
+// Authentication functions that don't require token validation
+const AUTH_FUNCTIONS = [
+  'getAuthUrl',
+  'checkAuthStatus',
+  'manualAuth'
+] 
