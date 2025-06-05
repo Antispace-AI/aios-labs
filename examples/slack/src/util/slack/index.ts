@@ -24,6 +24,7 @@ export * from './types'
 
 // Export shared utilities
 export { SlackClientPool, SlackAPIError, clientPool, handleSlackResponse } from './client'
+import { SlackAPIError } from './client'
 
 // Authentication module exports
 export {
@@ -424,6 +425,50 @@ function parseNaturalLanguageCommandFallback(command: string): { functionName: s
   }
   
   return null
+}
+
+/**
+ * Shared utility to resolve a channel name to a channel ID
+ * This is used by multiple functions that need to support channel names
+ */
+export async function resolveChannelNameToId(
+  client: any, // WebClient
+  channelNameOrId: string,
+  includePrivate: boolean = true
+): Promise<string> {
+  // If it's already a valid channel ID, return it directly
+  if (channelNameOrId.match(/^C[A-Z0-9]{8,}$/)) {
+    return channelNameOrId;
+  }
+  
+  // If it's a channel name with #, strip it
+  let channelName = channelNameOrId;
+  if (channelName.startsWith('#')) {
+    channelName = channelName.substring(1);
+  }
+  
+  // Find channel by name
+  const types = includePrivate ? 'public_channel,private_channel' : 'public_channel';
+  const listResult = await client.conversations.list({
+    types,
+    exclude_archived: true,
+    limit: 1000
+  });
+  
+  if (listResult.ok && listResult.channels) {
+    const channel = listResult.channels.find(
+      (c: any) => c.name === channelName || c.name === channelName.toLowerCase()
+    );
+    
+    if (channel && channel.id) {
+      console.log(`🔍 Resolved channel name "${channelName}" to ID "${channel.id}"`);
+      return channel.id;
+    } else {
+      throw new SlackAPIError(`Could not find channel with name: ${channelName}`, 'CHANNEL_NOT_FOUND');
+    }
+  } else {
+    throw new SlackAPIError(`Failed to list channels: ${listResult.error}`, 'API_ERROR');
+  }
 }
 
 /**

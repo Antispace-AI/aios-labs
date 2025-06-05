@@ -88,7 +88,7 @@ export const getMessages: AntispaceAppFunction<
       properties: {
         channel: {
           type: "string",
-          description: "Channel ID (e.g. C1234567890) or user ID for DM (e.g. U1234567890)",
+          description: "Channel ID (e.g. C1234567890), channel name (e.g. 'general' or '#general'), or user ID for DM (e.g. U1234567890)",
         },
         limit: {
           type: "number",
@@ -188,7 +188,7 @@ export const getConversationDetails: AntispaceAppFunction<
       properties: {
         channel: {
           type: "string",
-          description: "Channel ID (e.g. C1234567890) or user ID for DM (e.g. U1234567890)",
+          description: "Channel ID (e.g. C1234567890), channel name (e.g. 'general' or '#general'), or user ID for DM (e.g. U1234567890)",
         },
       },
       required: ["channel"],
@@ -529,7 +529,7 @@ export const leaveConversation: AntispaceAppFunction<
 export const updateMessage: AntispaceAppFunction<
   "updateMessage",
   {
-    conversationId: string
+    channelNameOrId: string
     messageTs: string
     text?: string
     blocks?: any[]
@@ -542,9 +542,9 @@ export const updateMessage: AntispaceAppFunction<
     parameters: {
       type: "object",
       properties: {
-        conversationId: {
+        channelNameOrId: {
           type: "string",
-          description: "Channel ID (e.g. C1234567890) where the message is located",
+          description: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general') where the message is located",
         },
         messageTs: {
           type: "string",
@@ -570,7 +570,7 @@ export const updateMessage: AntispaceAppFunction<
 export const deleteMessage: AntispaceAppFunction<
   "deleteMessage",
   {
-    conversationId: string
+    channelNameOrId: string
     messageTs: string
   }
 > = {
@@ -581,9 +581,9 @@ export const deleteMessage: AntispaceAppFunction<
     parameters: {
       type: "object",
       properties: {
-        conversationId: {
+        channelNameOrId: {
           type: "string",
-          description: "Channel ID (e.g. C1234567890) where the message is located",
+          description: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general') where the message is located",
         },
         messageTs: {
           type: "string",
@@ -601,7 +601,7 @@ export const deleteMessage: AntispaceAppFunction<
 export const getMessagePermalink: AntispaceAppFunction<
   "getMessagePermalink",
   {
-    conversationId: string
+    channelNameOrId: string
     messageTs: string
   }
 > = {
@@ -612,9 +612,9 @@ export const getMessagePermalink: AntispaceAppFunction<
     parameters: {
       type: "object",
       properties: {
-        conversationId: {
+        channelNameOrId: {
           type: "string",
-          description: "Channel ID (e.g. C1234567890) where the message is located",
+          description: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general') where the message is located",
         },
         messageTs: {
           type: "string",
