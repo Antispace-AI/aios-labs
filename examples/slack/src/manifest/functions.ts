@@ -489,7 +489,7 @@ export const joinConversation: AntispaceAppFunction<
       properties: {
         conversationId: {
           type: "string",
-          description: "Channel ID (e.g. C1234567890) of the public channel to join",
+          description: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general') of the public channel to join",
         },
       },
       required: ["conversationId"],
@@ -515,7 +515,7 @@ export const leaveConversation: AntispaceAppFunction<
       properties: {
         conversationId: {
           type: "string",
-          description: "Channel ID (e.g. C1234567890) or group ID to leave",
+          description: "Channel ID (e.g. C1234567890), channel name (e.g. 'general' or '#general'), or group ID to leave",
         },
       },
       required: ["conversationId"],

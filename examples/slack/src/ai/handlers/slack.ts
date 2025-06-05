@@ -102,12 +102,14 @@ export async function handleSlackActions(
     // CONV-009: joinConversation
     case "joinConversation": {
       const { conversationId } = parsedParams as any
+      // conversationId can now be a channel name or ID
       return await joinConversation(user, conversationId)
     }
 
     // CONV-010: leaveConversation
     case "leaveConversation": {
       const { conversationId } = parsedParams as any
+      // conversationId can now be a channel name or ID
       return await leaveConversation(user, conversationId)
     }
 

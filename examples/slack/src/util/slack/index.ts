@@ -264,14 +264,14 @@ export async function parseNaturalLanguageCommand(command: string): Promise<{ fu
       joinConversation: {
         description: "Join a public channel",
         parameters: {
-          conversationId: "Channel ID (e.g. C1234567890) to join"
+          conversationId: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general') to join"
         },
         required: ["conversationId"]
       },
       leaveConversation: {
         description: "Leave a channel or group",
         parameters: {
-          conversationId: "Channel ID (e.g. C1234567890) or group ID to leave"
+          conversationId: "Channel ID (e.g. C1234567890), channel name (e.g. 'general' or '#general'), or group ID to leave"
         },
         required: ["conversationId"]
       }
