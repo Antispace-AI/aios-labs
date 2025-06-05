@@ -9,4 +9,7 @@ export type SlackUIActions = {
   refreshMessages: { channel: string }
   logoutSlack: {}
   checkAuthStatus: {}
+  toggleDeveloperMode: {}
+  executeNaturalLanguage: { naturalLanguageCommand: string }
+  executeSlackFunction: { functionName: string; functionParams?: string }
 }

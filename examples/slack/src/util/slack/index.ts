@@ -82,6 +82,98 @@ export {
 } from './files'
 
 /**
+ * Developer mode utilities for bypassing rate limiting
+ * ⚠️ FOR DEVELOPMENT ONLY - Use with caution in production
+ */
+
+/**
+ * Execute a Slack function directly with rate limiting bypassed
+ * This bypasses all rate limiting mechanisms for developer mode
+ */
+export async function executeWithBypassedRateLimit<T>(
+  operation: () => Promise<T>,
+  operationName: string
+): Promise<T> {
+  console.log(`🚨 DEVELOPER MODE: Executing ${operationName} with ALL rate limiting bypassed`)
+  
+  try {
+    // Execute the operation directly without any rate limiting
+    const result = await operation()
+    
+    console.log(`✅ DEVELOPER MODE: Successfully executed ${operationName}`)
+    return result
+  } catch (error: any) {
+    console.error(`❌ DEVELOPER MODE: Failed to execute ${operationName}:`, error.message)
+    throw error
+  }
+}
+
+/**
+ * Parse natural language commands and map them to function calls
+ */
+export function parseNaturalLanguageCommand(command: string): { functionName: string; params: any } | null {
+  const lowerCommand = command.toLowerCase().trim()
+  
+  // Send message patterns
+  if (lowerCommand.includes('send') && (lowerCommand.includes('message') || lowerCommand.includes('say'))) {
+    const channelMatch = lowerCommand.match(/(?:to|in)\s+([#@]\w+|\w+)/i)
+    const textMatch = lowerCommand.match(/(?:saying?|message)\s+["']?([^"']+)["']?/i)
+    
+    if (channelMatch && textMatch) {
+      return {
+        functionName: 'sendMessage',
+        params: {
+          channel: channelMatch[1],
+          text: textMatch[1]
+        }
+      }
+    }
+  }
+  
+  // Get messages patterns
+  if (lowerCommand.includes('get') || lowerCommand.includes('show') || lowerCommand.includes('recent')) {
+    if (lowerCommand.includes('message')) {
+      const channelMatch = lowerCommand.match(/(?:from|in)\s+([#@]\w+|\w+)/i)
+      if (channelMatch) {
+        return {
+          functionName: 'getMessages',
+          params: {
+            channel: channelMatch[1],
+            limit: 10
+          }
+        }
+      }
+    }
+  }
+  
+  // List conversations
+  if (lowerCommand.includes('conversation') || lowerCommand.includes('channel')) {
+    if (lowerCommand.includes('list') || lowerCommand.includes('get') || lowerCommand.includes('show')) {
+      return {
+        functionName: 'listConversations',
+        params: {}
+      }
+    }
+  }
+  
+  // Search messages
+  if (lowerCommand.includes('search')) {
+    const queryMatch = lowerCommand.match(/search\s+(?:for\s+)?["']?([^"']+)["']?/i)
+    if (queryMatch) {
+      return {
+        functionName: 'searchMessages',
+        params: {
+          query: queryMatch[1],
+          count: 20
+        }
+      }
+    }
+  }
+  
+  return null
+}
+
+/**
  * ✅ PHASE 1 & 2A IMPLEMENTATION STATUS:
  * 
  * ✅ Phase 1 Core Functions:

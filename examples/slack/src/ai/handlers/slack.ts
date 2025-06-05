@@ -151,4 +151,83 @@ export async function handleSlackActions(
       }
     }
   }
+}
+
+/**
+ * Execute Slack functions with rate limiting bypassed for developer mode
+ * This is called from the widget UI for direct function execution
+ */
+export async function executeSlackFunctionBypass(
+  functionName: string,
+  parameters: any,
+  user: User
+): Promise<any> {
+  
+  try {
+    console.log(`🚨 DEVELOPER MODE: Starting bypass execution of ${functionName}`)
+    
+    // Import the bypass utility
+    const { executeWithBypassedRateLimit } = await import("../../util/slack/index.js")
+    
+    const result = await executeWithBypassedRateLimit(async () => {
+      // Execute the function normally, but rate limiting is bypassed
+      return await handleSlackActions(functionName, parameters, user)
+    }, `BYPASS_${functionName}`)
+    
+    console.log(`🚨 DEVELOPER MODE: Bypass execution completed for ${functionName}`, result)
+    
+    // Ensure we always return a valid object
+    return result || { success: true, message: "Function executed but returned no data" }
+  } catch (error: any) {
+    console.error(`🚨 DEVELOPER MODE: Bypass execution failed for ${functionName}:`, error)
+    return {
+      error: error.message || "Unknown error occurred",
+      functionName,
+      parameters
+    }
+  }
+}
+
+/**
+ * Execute natural language commands with rate limiting bypassed
+ */
+export async function executeNaturalLanguageBypass(
+  command: string,
+  user: User
+): Promise<any> {
+  
+  try {
+    console.log(`🚨 DEVELOPER MODE: Starting natural language bypass for: "${command}"`)
+    
+    // Import the utilities
+    const { executeWithBypassedRateLimit, parseNaturalLanguageCommand } = await import("../../util/slack/index.js")
+    
+    const parsed = parseNaturalLanguageCommand(command)
+    
+    if (!parsed) {
+      console.log(`🚨 DEVELOPER MODE: Could not parse command: "${command}"`)
+      return {
+        error: "Could not parse natural language command",
+        suggestion: "Try commands like 'send a message to #general saying hello' or 'get recent messages from #random'",
+        command
+      }
+    }
+    
+    console.log(`🚨 DEVELOPER MODE: Parsed command as:`, parsed)
+    
+    const result = await executeWithBypassedRateLimit(async () => {
+      return await handleSlackActions(parsed.functionName, parsed.params, user)
+    }, `BYPASS_NL_${parsed.functionName}`)
+    
+    console.log(`🚨 DEVELOPER MODE: Natural language bypass completed`, result)
+    
+    // Ensure we always return a valid object
+    return result || { success: true, message: "Command executed but returned no data" }
+  } catch (error: any) {
+    console.error(`🚨 DEVELOPER MODE: Natural language bypass failed:`, error)
+    return {
+      error: error.message || "Unknown error occurred",
+      command
+    }
+  }
 } 
