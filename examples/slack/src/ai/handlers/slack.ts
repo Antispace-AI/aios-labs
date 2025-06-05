@@ -202,7 +202,7 @@ export async function executeNaturalLanguageBypass(
     // Import the utilities
     const { executeWithBypassedRateLimit, parseNaturalLanguageCommand } = await import("../../util/slack/index.js")
     
-    const parsed = parseNaturalLanguageCommand(command)
+    const parsed = await parseNaturalLanguageCommand(command)
     
     if (!parsed) {
       console.log(`🚨 DEVELOPER MODE: Could not parse command: "${command}"`)
