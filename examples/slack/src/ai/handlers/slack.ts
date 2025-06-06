@@ -1,16 +1,19 @@
 import { sendMessage, getMessages, updateMessage, deleteMessage, getMessagePermalink } from "../../util/slack/messaging"
-import { listConversations, getConversationDetails, getConversationMembers, createConversation, joinConversation, leaveConversation } from "../../util/slack/conversations"  
+import { listConversations, getConversationDetails, getConversationMembers, createConversation, joinConversation, leaveConversation, archiveConversation, unarchiveConversation, setConversationTopicPurpose } from "../../util/slack/conversations"  
 import { searchMessages } from "../../util/slack/search"
-import { getUserProfile } from "../../util/slack/users"
+import { getUserProfile, setUserStatus, getUserPresence, listUsers } from "../../util/slack/users"
 import { getTotalUnreadSummary, markConversationAsRead, getRecentUnreadMessages } from "../../util/slack/realtime"
 import { revokeAuthentication } from "../../util/slack/auth"
 import { listFiles, uploadFile } from "../../util/slack/files"
+import { addReaction, removeReaction, getMessageReactions, pinMessage, unpinMessage, listPinnedMessages } from "../../util/slack/interactions"
 import type { User } from "../../util"
 
 /**
  * Slack action handlers
- * Uses implementation plan function names (docs/slack_functions_implementation_plan.md)
- * Updated with Phase 2A functions
+ * Uses clean parameter naming convention:
+ * - channelIdentifier: for channel-only functions
+ * - conversationIdentifier: for universal conversation functions (channels + DMs)
+ * - userIdentifier: for user functions
  */
 
 export async function handleSlackActions(
@@ -22,8 +25,8 @@ export async function handleSlackActions(
   switch (name) {
     // MSG-002: sendMessage
     case "sendMessage": {
-      const { channel, text, threadTs } = parsedParams as any
-      return await sendMessage(user, channel, text, undefined, threadTs)
+      const { channelIdentifier, text, threadTs } = parsedParams as any
+      return await sendMessage(user, channelIdentifier, text, undefined, threadTs)
     }
 
     // CONV-001: listConversations
@@ -41,26 +44,26 @@ export async function handleSlackActions(
 
     // MSG-001: getMessages
     case "getMessages": {
-      const { channel, limit = 20 } = parsedParams as any
-      return await getMessages(user, channel, limit)
+      const { channelIdentifier, limit = 20 } = parsedParams as any
+      return await getMessages(user, channelIdentifier, limit)
     }
 
     // SRCH-001: searchMessages
     case "searchMessages": {
-      const { query, count = 20 } = parsedParams as any
-      return await searchMessages(user, query, count)
+      const { query, limit = 20 } = parsedParams as any
+      return await searchMessages(user, query, limit)
     }
 
     // USER-001: getUserProfile
     case "getUserProfile": {
-      const { user: userId } = parsedParams as any
-      return await getUserProfile(user, userId)
+      const { userIdentifier } = parsedParams as any
+      return await getUserProfile(user, userIdentifier)
     }
 
     // CONV-002: getConversationDetails
     case "getConversationDetails": {
-      const { channel } = parsedParams as any
-      return await getConversationDetails(user, channel)
+      const { conversationIdentifier } = parsedParams as any
+      return await getConversationDetails(user, conversationIdentifier)
     }
 
     // RT-001: getTotalUnreadSummary
@@ -76,8 +79,8 @@ export async function handleSlackActions(
 
     // RT-003: markConversationAsRead
     case "markConversationAsRead": {
-      const { conversationId, latestTs } = parsedParams as any
-      return await markConversationAsRead(user, conversationId, latestTs)
+      const { conversationIdentifier, latestMessageTs } = parsedParams as any
+      return await markConversationAsRead(user, conversationIdentifier, latestMessageTs)
     }
 
     // ===== PHASE 2A FUNCTIONS =====
@@ -89,8 +92,8 @@ export async function handleSlackActions(
 
     // CONV-003: getConversationMembers
     case "getConversationMembers": {
-      const { conversationId, limit } = parsedParams as any
-      return await getConversationMembers(user, conversationId, limit)
+      const { channelIdentifier, limit } = parsedParams as any
+      return await getConversationMembers(user, channelIdentifier, limit)
     }
 
     // CONV-004: createConversation
@@ -101,50 +104,122 @@ export async function handleSlackActions(
 
     // CONV-009: joinConversation
     case "joinConversation": {
-      const { conversationId } = parsedParams as any
-      // conversationId can now be a channel name or ID
-      return await joinConversation(user, conversationId)
+      const { channelIdentifier } = parsedParams as any
+      return await joinConversation(user, channelIdentifier)
     }
 
     // CONV-010: leaveConversation
     case "leaveConversation": {
-      const { conversationId } = parsedParams as any
-      // conversationId can now be a channel name or ID
-      return await leaveConversation(user, conversationId)
+      const { channelIdentifier } = parsedParams as any
+      return await leaveConversation(user, channelIdentifier)
     }
 
     // MSG-003: updateMessage
     case "updateMessage": {
-      const { conversationId, messageTs, text, blocks } = parsedParams as any
-      return await updateMessage(user, conversationId, messageTs, text, blocks)
+      const { channelIdentifier, messageTs, text, blocks } = parsedParams as any
+      return await updateMessage(user, channelIdentifier, messageTs, text, blocks)
     }
 
     // MSG-004: deleteMessage
     case "deleteMessage": {
-      const { conversationId, messageTs } = parsedParams as any
-      return await deleteMessage(user, conversationId, messageTs)
+      const { channelIdentifier, messageTs } = parsedParams as any
+      return await deleteMessage(user, channelIdentifier, messageTs)
     }
 
     // MSG-006: getMessagePermalink
     case "getMessagePermalink": {
-      const { conversationId, messageTs } = parsedParams as any
-      return await getMessagePermalink(user, conversationId, messageTs)
+      const { channelIdentifier, messageTs } = parsedParams as any
+      return await getMessagePermalink(user, channelIdentifier, messageTs)
     }
 
     // FILE-001: listFiles
     case "listFiles": {
-      const { conversationId, types, limit, page } = parsedParams as any
-      return await listFiles(user, conversationId, types, limit, page)
+      const { conversationIdentifier, types, limit, page } = parsedParams as any
+      return await listFiles(user, conversationIdentifier, types, limit, page)
     }
 
     // FILE-002: uploadFile
     case "uploadFile": {
-      const { conversationId, filename, title, initialComment, filetype } = parsedParams as any
+      const { conversationIdentifier, filename, title, initialComment, filetype } = parsedParams as any
       // Note: This is a placeholder - actual file upload would need file content handling
       return {
         success: false,
         error: "File upload requires file content handling implementation"
       }
+    }
+
+    // ===== PHASE 2B FUNCTIONS =====
+
+    // INTR-001: addReaction
+    case "addReaction": {
+      const { channelIdentifier, messageTs, emoji } = parsedParams as any
+      return await addReaction(user, channelIdentifier, messageTs, emoji)
+    }
+
+    // INTR-002: removeReaction
+    case "removeReaction": {
+      const { channelIdentifier, messageTs, emoji } = parsedParams as any
+      return await removeReaction(user, channelIdentifier, messageTs, emoji)
+    }
+
+    // INTR-003: getMessageReactions
+    case "getMessageReactions": {
+      const { channelIdentifier, messageTs } = parsedParams as any
+      return await getMessageReactions(user, channelIdentifier, messageTs)
+    }
+
+    // INTR-004: pinMessage
+    case "pinMessage": {
+      const { channelIdentifier, messageTs } = parsedParams as any
+      return await pinMessage(user, channelIdentifier, messageTs)
+    }
+
+    // INTR-005: unpinMessage
+    case "unpinMessage": {
+      const { channelIdentifier, messageTs } = parsedParams as any
+      return await unpinMessage(user, channelIdentifier, messageTs)
+    }
+
+    // INTR-006: listPinnedMessages
+    case "listPinnedMessages": {
+      const { channelIdentifier } = parsedParams as any
+      return await listPinnedMessages(user, channelIdentifier)
+    }
+
+    // USER-002: setUserStatus
+    case "setUserStatus": {
+      const { statusText, statusEmoji, statusExpiration } = parsedParams as any
+      return await setUserStatus(user, statusText, statusEmoji, statusExpiration)
+    }
+
+    // USER-003: getUserPresence
+    case "getUserPresence": {
+      const { userIdentifier } = parsedParams as any
+      return await getUserPresence(user, userIdentifier)
+    }
+
+    // USER-004: listUsers
+    case "listUsers": {
+      const { limit, cursor, includeLocale } = parsedParams as any
+      return await listUsers(user, limit, cursor, includeLocale)
+    }
+
+    // CONV-005: archiveConversation
+    case "archiveConversation": {
+      const { channelIdentifier } = parsedParams as any
+      return await archiveConversation(user, channelIdentifier)
+    }
+
+    // CONV-006: unarchiveConversation
+    case "unarchiveConversation": {
+      const { channelIdentifier } = parsedParams as any
+      return await unarchiveConversation(user, channelIdentifier)
+    }
+
+    // CONV-011: setConversationTopicPurpose
+    case "setConversationTopicPurpose": {
+      const { channelIdentifier, topic, purpose } = parsedParams as any
+      return await setConversationTopicPurpose(user, channelIdentifier, topic, purpose)
     }
 
     default: {
@@ -221,7 +296,18 @@ export async function executeNaturalLanguageBypass(
       return await handleSlackActions(parsed.functionName, parsed.params, user)
     }, `BYPASS_NL_${parsed.functionName}`)
     
-    console.log(`🚨 DEVELOPER MODE: Natural language bypass completed`, result)
+    // Enhanced logging for better reaction display
+    if (parsed.functionName === 'getMessageReactions' && result?.reactions) {
+      console.log(`🚨 DEVELOPER MODE: Natural language bypass completed for getMessageReactions:`)
+      console.log(`  Success: ${result.success}`)
+      console.log(`  Reactions:`)
+      result.reactions.forEach((reaction: any, index: number) => {
+        console.log(`    ${index + 1}. ${reaction.name} (${reaction.count} reactions)`)
+        console.log(`       Users: [${reaction.users.join(', ')}]`)
+      })
+    } else {
+      console.log(`🚨 DEVELOPER MODE: Natural language bypass completed`, result)
+    }
     
     // Ensure we always return a valid object
     return result || { success: true, message: "Command executed but returned no data" }

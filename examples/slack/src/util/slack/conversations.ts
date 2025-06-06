@@ -12,6 +12,7 @@ import type {
 } from './types'
 import { validateUserAuth } from './auth'
 import { clientPool, handleSlackResponse, SlackAPIError } from './client'
+import { resolveChannelNameToId, resolveConversationId } from './utils'
 
 /**
  * CONV-001: List conversations (channels, DMs, group DMs) for the user
@@ -160,15 +161,28 @@ export async function listConversations(
 /**
  * CONV-002: getConversationDetails - Get detailed information for a specific conversation
  */
-export async function getConversationDetails(user: User, channel: string) {
+export async function getConversationDetails(user: User, conversationIdentifier: string) {
   validateUserAuth(user)
   const client = clientPool.getClient(user.accessToken!)
   
   return handleSlackResponse(async () => {
-    console.log(`🔧 [conversations.ts] Getting conversation details for ${channel}`)
+    console.log(`🔧 [conversations.ts] Getting conversation details for ${conversationIdentifier}`)
+    
+    // Resolve channel/conversation ID if needed
+    let conversationId;
+    try {
+      conversationId = await resolveConversationId(client, conversationIdentifier, {
+        includePrivate: true,
+        includeArchived: true,
+        allowDMs: true
+      });
+    } catch (error) {
+      console.error('❌ Failed to resolve conversation:', error);
+      throw error;
+    }
     
     const result = await client.conversations.info({
-      channel,
+      channel: conversationId,
     })
     
     if (!result.ok) {
@@ -220,13 +234,13 @@ function getConversationDisplayName(conversation: any): string {
  */
 export async function getConversationMembers(
   user: User, 
-  conversationId: string,
+  channelIdentifier: string,
   limit?: number,
   cursor?: string
 ): Promise<{ success: boolean, members: any[], nextPageCursor?: string, error?: string }> {
   try {
     console.log('👥 Getting conversation members:', {
-      conversationId,
+      channelIdentifier,
       limit,
       cursor: cursor ? `${cursor.substring(0, 20)}...` : undefined
     })
@@ -234,9 +248,22 @@ export async function getConversationMembers(
     validateUserAuth(user)
     const client = clientPool.getClient(user.accessToken!)
 
+    // Resolve conversation ID if needed
+    let resolvedConversationId;
+    try {
+      resolvedConversationId = await resolveConversationId(client, channelIdentifier, {
+        includePrivate: true,
+        includeArchived: false,
+        allowDMs: false // Members API doesn't work with DMs
+      });
+    } catch (error) {
+      console.error('❌ Failed to resolve conversation:', error);
+      throw error;
+    }
+
     return handleSlackResponse(async () => {
       const result = await client.conversations.members({
-        channel: conversationId,
+        channel: resolvedConversationId,
         limit: limit || 100,
         cursor
       })
@@ -407,51 +434,25 @@ export async function createConversation(
  */
 export async function joinConversation(
   user: User,
-  channelNameOrId: string
+  channelIdentifier: string
 ): Promise<{ success: boolean, conversation?: any, error?: string }> {
   try {
-    console.log('🔗 Joining conversation:', channelNameOrId)
+    console.log('🔗 Joining conversation:', channelIdentifier)
 
     validateUserAuth(user)
     const client = clientPool.getClient(user.accessToken!)
 
-    // Handle channel names by removing # if present
-    let channelId = channelNameOrId;
-    
-    // If it's a channel name with #, strip it
-    if (channelNameOrId.startsWith('#')) {
-      channelNameOrId = channelNameOrId.substring(1);
-    }
-    
-    // If it doesn't look like a channel ID (C followed by alphanumeric),
-    // try to find the channel by name
-    if (!channelId.match(/^C[A-Z0-9]{8,}$/)) {
-      try {
-        // Find channel by name
-        const listResult = await client.conversations.list({
-          types: 'public_channel',
-          exclude_archived: true,
-          limit: 1000
-        });
-        
-        if (listResult.ok && listResult.channels) {
-          const channel = listResult.channels.find(
-            c => c.name === channelNameOrId || c.name === channelNameOrId.toLowerCase()
-          );
-          
-          if (channel && channel.id) {
-            channelId = channel.id;
-            console.log(`🔍 Resolved channel name "${channelNameOrId}" to ID "${channelId}"`);
-          } else {
-            throw new SlackAPIError(`Could not find channel with name: ${channelNameOrId}`, 'CHANNEL_NOT_FOUND');
-          }
-        } else {
-          throw new SlackAPIError(`Failed to list channels: ${listResult.error}`, 'API_ERROR');
-        }
-      } catch (error) {
-        console.error('❌ Failed to resolve channel name:', error);
-        throw error;
-      }
+    // Resolve channel name to ID if needed (only public channels for joining)
+    let channelId;
+    try {
+      channelId = await resolveChannelNameToId(client, channelIdentifier, {
+        includePrivate: false, // Only public channels can be joined
+        includeArchived: false,
+        types: 'public_channel'
+      });
+    } catch (error) {
+      console.error('❌ Failed to resolve channel name:', error);
+      throw error;
     }
 
     return handleSlackResponse(async () => {
@@ -484,7 +485,7 @@ export async function joinConversation(
       if (error.code === 'CHANNEL_NOT_FOUND') {
         return {
           success: false,
-          error: `Channel "${channelNameOrId}" not found. Please provide a valid channel name or ID.`
+          error: `Channel "${channelIdentifier}" not found. Please provide a valid channel name or ID.`
         }
       }
       return {
@@ -505,51 +506,24 @@ export async function joinConversation(
  */
 export async function leaveConversation(
   user: User,
-  channelNameOrId: string
+  channelIdentifier: string
 ): Promise<{ success: boolean, error?: string }> {
   try {
-    console.log('👋 Leaving conversation:', channelNameOrId)
+    console.log('👋 Leaving conversation:', channelIdentifier)
 
     validateUserAuth(user)
     const client = clientPool.getClient(user.accessToken!)
 
-    // Handle channel names by removing # if present
-    let channelId = channelNameOrId;
-    
-    // If it's a channel name with #, strip it
-    if (channelNameOrId.startsWith('#')) {
-      channelNameOrId = channelNameOrId.substring(1);
-    }
-    
-    // If it doesn't look like a channel ID (C followed by alphanumeric),
-    // try to find the channel by name
-    if (!channelId.match(/^C[A-Z0-9]{8,}$/)) {
-      try {
-        // Find channel by name
-        const listResult = await client.conversations.list({
-          types: 'public_channel,private_channel',
-          exclude_archived: true,
-          limit: 1000
-        });
-        
-        if (listResult.ok && listResult.channels) {
-          const channel = listResult.channels.find(
-            c => c.name === channelNameOrId || c.name === channelNameOrId.toLowerCase()
-          );
-          
-          if (channel && channel.id) {
-            channelId = channel.id;
-            console.log(`🔍 Resolved channel name "${channelNameOrId}" to ID "${channelId}"`);
-          } else {
-            throw new SlackAPIError(`Could not find channel with name: ${channelNameOrId}`, 'CHANNEL_NOT_FOUND');
-          }
-        } else {
-          throw new SlackAPIError(`Failed to list channels: ${listResult.error}`, 'API_ERROR');
-        }
-      } catch (error) {
-        console.error('❌ Failed to resolve channel name:', error);
-        throw error;
-      }
+    // Resolve channel name to ID if needed
+    let channelId;
+    try {
+      channelId = await resolveChannelNameToId(client, channelIdentifier, {
+        includePrivate: true,
+        includeArchived: false
+      });
+    } catch (error) {
+      console.error('❌ Failed to resolve channel name:', error);
+      throw error;
     }
 
     return handleSlackResponse(async () => {
@@ -576,7 +550,7 @@ export async function leaveConversation(
       if (error.code === 'CHANNEL_NOT_FOUND') {
         return {
           success: false,
-          error: `Channel "${channelNameOrId}" not found. Please provide a valid channel name or ID.`
+          error: `Channel "${channelIdentifier}" not found. Please provide a valid channel name or ID.`
         }
       }
       return {
@@ -588,6 +562,225 @@ export async function leaveConversation(
     return {
       success: false,
       error: `Failed to leave conversation: ${error instanceof Error ? error.message : 'Unknown error'}`
+    }
+  }
+}
+
+/**
+ * CONV-005: archiveConversation - Phase 2B Implementation
+ */
+export async function archiveConversation(
+  user: User,
+  channelIdentifier: string
+): Promise<{ success: boolean, error?: string }> {
+  try {
+    console.log('🗄️ Archiving conversation:', channelIdentifier)
+
+    validateUserAuth(user)
+    const client = clientPool.getClient(user.accessToken!)
+
+    // Resolve channel name to ID if needed
+    let channelId;
+    try {
+      channelId = await resolveChannelNameToId(client, channelIdentifier);
+    } catch (error) {
+      console.error('❌ Failed to resolve channel name:', error);
+      throw error;
+    }
+
+    return handleSlackResponse(async () => {
+      const result = await client.conversations.archive({
+        channel: channelId
+      })
+
+      if (!result.ok) {
+        throw new SlackAPIError(`Failed to archive conversation: ${result.error}`, 'API_ERROR')
+      }
+
+      console.log(`✅ Successfully archived conversation: ${channelId}`)
+
+      return {
+        success: true
+      }
+
+    }, 'archiveConversation')
+
+  } catch (error) {
+    console.error('❌ Failed to archive conversation:', error)
+    
+    if (error instanceof SlackAPIError) {
+      if (error.code === 'CHANNEL_NOT_FOUND') {
+        return {
+          success: false,
+          error: `Channel "${channelIdentifier}" not found. Please provide a valid channel name or ID.`
+        }
+      }
+      return {
+        success: false,
+        error: error.message
+      }
+    }
+
+    return {
+      success: false,
+      error: `Failed to archive conversation: ${error instanceof Error ? error.message : 'Unknown error'}`
+    }
+  }
+}
+
+/**
+ * CONV-006: unarchiveConversation - Phase 2B Implementation
+ */
+export async function unarchiveConversation(
+  user: User,
+  channelIdentifier: string
+): Promise<{ success: boolean, error?: string }> {
+  try {
+    console.log('📂 Unarchiving conversation:', channelIdentifier)
+
+    validateUserAuth(user)
+    const client = clientPool.getClient(user.accessToken!)
+
+    // Resolve channel name to ID if needed (include archived channels for unarchiving)
+    let channelId;
+    try {
+      channelId = await resolveChannelNameToId(client, channelIdentifier, {
+        includePrivate: true,
+        includeArchived: true // Include archived channels for unarchiving
+      });
+    } catch (error) {
+      console.error('❌ Failed to resolve channel name:', error);
+      throw error;
+    }
+
+    return handleSlackResponse(async () => {
+      const result = await client.conversations.unarchive({
+        channel: channelId
+      })
+
+      if (!result.ok) {
+        throw new SlackAPIError(`Failed to unarchive conversation: ${result.error}`, 'API_ERROR')
+      }
+
+      console.log(`✅ Successfully unarchived conversation: ${channelId}`)
+
+      return {
+        success: true
+      }
+
+    }, 'unarchiveConversation')
+
+  } catch (error) {
+    console.error('❌ Failed to unarchive conversation:', error)
+    
+    if (error instanceof SlackAPIError) {
+      if (error.code === 'CHANNEL_NOT_FOUND') {
+        return {
+          success: false,
+          error: `Channel "${channelIdentifier}" not found. Please provide a valid channel name or ID.`
+        }
+      }
+      return {
+        success: false,
+        error: error.message
+      }
+    }
+
+    return {
+      success: false,
+      error: `Failed to unarchive conversation: ${error instanceof Error ? error.message : 'Unknown error'}`
+    }
+  }
+}
+
+/**
+ * CONV-011: setConversationTopicPurpose - Phase 2B Implementation
+ */
+export async function setConversationTopicPurpose(
+  user: User,
+  channelIdentifier: string,
+  topic?: string,
+  purpose?: string
+): Promise<{ success: boolean, error?: string }> {
+  try {
+    console.log('📝 Setting conversation topic/purpose:', {
+      channelIdentifier,
+      hasTopic: !!topic,
+      hasPurpose: !!purpose
+    })
+
+    validateUserAuth(user)
+    const client = clientPool.getClient(user.accessToken!)
+
+    // Resolve channel name to ID if needed
+    let channelId;
+    try {
+      channelId = await resolveChannelNameToId(client, channelIdentifier);
+    } catch (error) {
+      console.error('❌ Failed to resolve channel name:', error);
+      throw error;
+    }
+
+    return handleSlackResponse(async () => {
+      const results: string[] = [];
+
+      // Set topic if provided
+      if (topic !== undefined) {
+        const topicResult = await client.conversations.setTopic({
+          channel: channelId,
+          topic: topic
+        });
+        
+        if (!topicResult.ok) {
+          throw new SlackAPIError(`Failed to set topic: ${topicResult.error}`, 'API_ERROR');
+        }
+        results.push('topic');
+      }
+
+      // Set purpose if provided
+      if (purpose !== undefined) {
+        const purposeResult = await client.conversations.setPurpose({
+          channel: channelId,
+          purpose: purpose
+        });
+        
+        if (!purposeResult.ok) {
+          throw new SlackAPIError(`Failed to set purpose: ${purposeResult.error}`, 'API_ERROR');
+        }
+        results.push('purpose');
+      }
+
+      if (results.length === 0) {
+        throw new SlackAPIError('No topic or purpose provided', 'INVALID_ARGUMENTS');
+      }
+
+      console.log(`✅ Successfully updated ${results.join(' and ')} for conversation: ${channelId}`);
+
+      return {
+        success: true
+      }
+
+    }, 'setConversationTopicPurpose')
+
+  } catch (error) {
+    console.error('❌ Failed to set conversation topic/purpose:', error)
+    
+    if (error instanceof SlackAPIError) {
+      if (error.code === 'CHANNEL_NOT_FOUND') {
+        return {
+          success: false,
+          error: `Channel "${channelIdentifier}" not found. Please provide a valid channel name or ID.`
+        }
+      }
+      return {
+        success: false,
+        error: error.message
+      }
+    }
+
+    return {
+      success: false,
+      error: `Failed to set conversation topic/purpose: ${error instanceof Error ? error.message : 'Unknown error'}`
     }
   }
 } 

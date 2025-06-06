@@ -6,7 +6,7 @@ import type { AntispaceAppFunction } from "@antispace/sdk"
 export const sendMessage: AntispaceAppFunction<
   "sendMessage",
   {
-    channel: string
+    channelIdentifier: string
     text: string
     threadTs?: string
   }
@@ -18,7 +18,7 @@ export const sendMessage: AntispaceAppFunction<
     parameters: {
       type: "object",
       properties: {
-        channel: {
+        channelIdentifier: {
           type: "string",
           description: "Channel ID (e.g. C1234567890), user ID for DM (e.g. U1234567890), or channel name (e.g. #general)",
         },
@@ -31,7 +31,7 @@ export const sendMessage: AntispaceAppFunction<
           description: "Optional timestamp of parent message to reply in thread",
         },
       },
-      required: ["channel", "text"],
+      required: ["channelIdentifier", "text"],
     },
   },
 }
@@ -73,7 +73,7 @@ export const listConversations: AntispaceAppFunction<
 export const getMessages: AntispaceAppFunction<
   "getMessages",
   {
-    channel: string
+    channelIdentifier: string
     limit?: number
     oldest?: string
     latest?: string
@@ -86,7 +86,7 @@ export const getMessages: AntispaceAppFunction<
     parameters: {
       type: "object",
       properties: {
-        channel: {
+        channelIdentifier: {
           type: "string",
           description: "Channel ID (e.g. C1234567890), channel name (e.g. 'general' or '#general'), or user ID for DM (e.g. U1234567890)",
         },
@@ -103,7 +103,7 @@ export const getMessages: AntispaceAppFunction<
           description: "Only messages before this timestamp (exclusive)",
         },
       },
-      required: ["channel"],
+      required: ["channelIdentifier"],
     },
   },
 }
@@ -145,27 +145,27 @@ export const searchMessages: AntispaceAppFunction<
 }
 
 /**
- * USER-001: Get user profile by user ID
+ * USER-001: Get user profile by user identifier
  */
 export const getUserProfile: AntispaceAppFunction<
   "getUserProfile",
   {
-    user: string
+    userIdentifier: string
   }
 > = {
   type: "function",
   function: {
     name: "getUserProfile",
-    description: "Get detailed profile information about a Slack user by their user ID",
+    description: "Get detailed profile information about a Slack user by their user ID, username, or display name",
     parameters: {
       type: "object",
       properties: {
-        user: {
+        userIdentifier: {
           type: "string",
-          description: "User ID (e.g. U1234567890)",
+          description: "User ID (e.g. U1234567890), username, or display name to get profile for",
         },
       },
-      required: ["user"],
+      required: ["userIdentifier"],
     },
   },
 }
@@ -176,7 +176,7 @@ export const getUserProfile: AntispaceAppFunction<
 export const getConversationDetails: AntispaceAppFunction<
   "getConversationDetails",
   {
-    channel: string
+    conversationIdentifier: string
   }
 > = {
   type: "function",
@@ -186,12 +186,12 @@ export const getConversationDetails: AntispaceAppFunction<
     parameters: {
       type: "object",
       properties: {
-        channel: {
+        conversationIdentifier: {
           type: "string",
           description: "Channel ID (e.g. C1234567890), channel name (e.g. 'general' or '#general'), or user ID for DM (e.g. U1234567890)",
         },
       },
-      required: ["channel"],
+      required: ["conversationIdentifier"],
     },
   },
 }
@@ -320,7 +320,8 @@ export const getRecentUnreadMessages: AntispaceAppFunction<
 export const markConversationAsRead: AntispaceAppFunction<
   "markConversationAsRead",
   {
-    conversationId: string
+    conversationIdentifier: string
+    latestMessageTs?: string
   }
 > = {
   type: "function",
@@ -330,12 +331,16 @@ export const markConversationAsRead: AntispaceAppFunction<
     parameters: {
       type: "object",
       properties: {
-        conversationId: {
+        conversationIdentifier: {
           type: "string",
-          description: "Conversation ID - for channels use C1234567890, for DMs use D1234567890 (NOT the user ID). Use the actual conversation ID from listConversations or getRecentUnreadMessages.",
+          description: "Channel ID (e.g. C1234567890), channel name (e.g. 'general' or '#general'), or user ID for DM (e.g. U1234567890)",
         },
+        latestMessageTs: {
+          type: "string",
+          description: "Optional timestamp of the latest message to mark as read",
       },
-      required: ["conversationId"],
+      },
+      required: ["conversationIdentifier"],
     },
   },
 }
@@ -346,7 +351,7 @@ export const markConversationAsRead: AntispaceAppFunction<
 export const getConversationThreads: AntispaceAppFunction<
   "getConversationThreads",
   {
-    conversationId: string
+    conversationIdentifier: string
     includeRead?: boolean
     minReplies?: number
     since?: string
@@ -359,9 +364,9 @@ export const getConversationThreads: AntispaceAppFunction<
     parameters: {
       type: "object",
       properties: {
-        conversationId: {
+        conversationIdentifier: {
           type: "string",
-          description: "Channel ID (e.g. C1234567890) to get threads from",
+          description: "Channel ID (e.g. C1234567890), channel name, or user ID to get threads from",
         },
         includeRead: {
           type: "boolean",
@@ -376,7 +381,7 @@ export const getConversationThreads: AntispaceAppFunction<
           description: "Only return threads created since this timestamp",
         },
       },
-      required: ["conversationId"],
+      required: ["conversationIdentifier"],
     },
   },
 }
@@ -410,7 +415,7 @@ export const revokeAuthentication: AntispaceAppFunction<
 export const getConversationMembers: AntispaceAppFunction<
   "getConversationMembers",
   {
-    conversationId: string
+    channelIdentifier: string
     limit?: number
   }
 > = {
@@ -421,16 +426,16 @@ export const getConversationMembers: AntispaceAppFunction<
     parameters: {
       type: "object",
       properties: {
-        conversationId: {
+        channelIdentifier: {
           type: "string",
-          description: "Channel ID (e.g. C1234567890) or group ID to get members from",
+          description: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general')",
         },
         limit: {
           type: "number",
           description: "Maximum number of members to return (default: 100, max: 1000)",
         },
       },
-      required: ["conversationId"],
+      required: ["channelIdentifier"],
     },
   },
 }
@@ -477,7 +482,7 @@ export const createConversation: AntispaceAppFunction<
 export const joinConversation: AntispaceAppFunction<
   "joinConversation",
   {
-    conversationId: string
+    channelIdentifier: string
   }
 > = {
   type: "function",
@@ -487,12 +492,12 @@ export const joinConversation: AntispaceAppFunction<
     parameters: {
       type: "object",
       properties: {
-        conversationId: {
+        channelIdentifier: {
           type: "string",
           description: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general') of the public channel to join",
         },
       },
-      required: ["conversationId"],
+      required: ["channelIdentifier"],
     },
   },
 }
@@ -503,7 +508,7 @@ export const joinConversation: AntispaceAppFunction<
 export const leaveConversation: AntispaceAppFunction<
   "leaveConversation",
   {
-    conversationId: string
+    channelIdentifier: string
   }
 > = {
   type: "function",
@@ -513,12 +518,12 @@ export const leaveConversation: AntispaceAppFunction<
     parameters: {
       type: "object",
       properties: {
-        conversationId: {
+        channelIdentifier: {
           type: "string",
-          description: "Channel ID (e.g. C1234567890), channel name (e.g. 'general' or '#general'), or group ID to leave",
+          description: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general')",
         },
       },
-      required: ["conversationId"],
+      required: ["channelIdentifier"],
     },
   },
 }
@@ -529,7 +534,7 @@ export const leaveConversation: AntispaceAppFunction<
 export const updateMessage: AntispaceAppFunction<
   "updateMessage",
   {
-    channelNameOrId: string
+    channelIdentifier: string
     messageTs: string
     text?: string
     blocks?: any[]
@@ -542,7 +547,7 @@ export const updateMessage: AntispaceAppFunction<
     parameters: {
       type: "object",
       properties: {
-        channelNameOrId: {
+        channelIdentifier: {
           type: "string",
           description: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general') where the message is located",
         },
@@ -559,7 +564,7 @@ export const updateMessage: AntispaceAppFunction<
           description: "Optional Slack Block Kit blocks for rich formatting",
         },
       },
-      required: ["conversationId", "messageTs"],
+      required: ["channelIdentifier", "messageTs"],
     },
   },
 }
@@ -570,7 +575,7 @@ export const updateMessage: AntispaceAppFunction<
 export const deleteMessage: AntispaceAppFunction<
   "deleteMessage",
   {
-    channelNameOrId: string
+    channelIdentifier: string
     messageTs: string
   }
 > = {
@@ -581,7 +586,7 @@ export const deleteMessage: AntispaceAppFunction<
     parameters: {
       type: "object",
       properties: {
-        channelNameOrId: {
+        channelIdentifier: {
           type: "string",
           description: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general') where the message is located",
         },
@@ -590,7 +595,7 @@ export const deleteMessage: AntispaceAppFunction<
           description: "Message timestamp (e.g. '1234567890.123456') of the message to delete",
         },
       },
-      required: ["conversationId", "messageTs"],
+      required: ["channelIdentifier", "messageTs"],
     },
   },
 }
@@ -601,7 +606,7 @@ export const deleteMessage: AntispaceAppFunction<
 export const getMessagePermalink: AntispaceAppFunction<
   "getMessagePermalink",
   {
-    channelNameOrId: string
+    channelIdentifier: string
     messageTs: string
   }
 > = {
@@ -612,7 +617,7 @@ export const getMessagePermalink: AntispaceAppFunction<
     parameters: {
       type: "object",
       properties: {
-        channelNameOrId: {
+        channelIdentifier: {
           type: "string",
           description: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general') where the message is located",
         },
@@ -621,7 +626,7 @@ export const getMessagePermalink: AntispaceAppFunction<
           description: "Message timestamp (e.g. '1234567890.123456') of the message",
         },
       },
-      required: ["conversationId", "messageTs"],
+      required: ["channelIdentifier", "messageTs"],
     },
   },
 }
@@ -632,7 +637,7 @@ export const getMessagePermalink: AntispaceAppFunction<
 export const listFiles: AntispaceAppFunction<
   "listFiles",
   {
-    conversationId?: string
+    conversationIdentifier?: string
     types?: string[]
     limit?: number
     page?: number
@@ -645,9 +650,9 @@ export const listFiles: AntispaceAppFunction<
     parameters: {
       type: "object",
       properties: {
-        conversationId: {
+        conversationIdentifier: {
           type: "string",
-          description: "Optional channel ID to filter files from specific channel",
+          description: "Optional channel ID, channel name, or user ID to filter files from specific conversation",
         },
         types: {
           type: "string",
@@ -673,7 +678,7 @@ export const listFiles: AntispaceAppFunction<
 export const uploadFile: AntispaceAppFunction<
   "uploadFile",
   {
-    conversationId: string
+    conversationIdentifier: string
     filename: string
     title?: string
     initialComment?: string
@@ -687,9 +692,9 @@ export const uploadFile: AntispaceAppFunction<
     parameters: {
       type: "object",
       properties: {
-        conversationId: {
+        conversationIdentifier: {
           type: "string",
-          description: "Channel ID (e.g. C1234567890) to upload the file to",
+          description: "Channel ID (e.g. C1234567890), channel name, or user ID to upload the file to",
         },
         filename: {
           type: "string",
@@ -708,7 +713,388 @@ export const uploadFile: AntispaceAppFunction<
           description: "Optional file type hint (e.g. 'pdf', 'text', 'image')",
         },
       },
-      required: ["conversationId", "filename"],
+      required: ["conversationIdentifier", "filename"],
+    },
+  },
+}
+
+/**
+ * PHASE 2B FUNCTIONS - User Experience
+ */
+
+/**
+ * INTR-001: Add reaction to message
+ */
+export const addReaction: AntispaceAppFunction<
+  "addReaction",
+  {
+    channelIdentifier: string
+    messageTs: string
+    emoji: string
+  }
+> = {
+  type: "function",
+  function: {
+    name: "addReaction",
+    description: "Add an emoji reaction to a specific message",
+    parameters: {
+      type: "object",
+      properties: {
+        channelIdentifier: {
+          type: "string",
+          description: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general') where the message is located",
+        },
+        messageTs: {
+          type: "string",
+          description: "Message timestamp (e.g. '1234567890.123456') of the message to react to",
+        },
+        emoji: {
+          type: "string",
+          description: "Emoji name (e.g. 'thumbsup', ':thumbsup:', or 'smile'). Colons are optional.",
+        },
+      },
+      required: ["channelIdentifier", "messageTs", "emoji"],
+    },
+  },
+}
+
+/**
+ * INTR-002: Remove reaction from message
+ */
+export const removeReaction: AntispaceAppFunction<
+  "removeReaction",
+  {
+    channelIdentifier: string
+    messageTs: string
+    emoji: string
+  }
+> = {
+  type: "function",
+  function: {
+    name: "removeReaction",
+    description: "Remove an emoji reaction from a specific message",
+    parameters: {
+      type: "object",
+      properties: {
+        channelIdentifier: {
+          type: "string",
+          description: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general') where the message is located",
+        },
+        messageTs: {
+          type: "string",
+          description: "Message timestamp (e.g. '1234567890.123456') of the message to remove reaction from",
+        },
+        emoji: {
+          type: "string",
+          description: "Emoji name (e.g. 'thumbsup', ':thumbsup:', or 'smile'). Colons are optional.",
+        },
+      },
+      required: ["channelIdentifier", "messageTs", "emoji"],
+    },
+  },
+}
+
+/**
+ * INTR-003: Get message reactions
+ */
+export const getMessageReactions: AntispaceAppFunction<
+  "getMessageReactions",
+  {
+    channelIdentifier: string
+    messageTs: string
+  }
+> = {
+  type: "function",
+  function: {
+    name: "getMessageReactions",
+    description: "Get all reactions on a specific message with user details",
+    parameters: {
+      type: "object",
+      properties: {
+        channelIdentifier: {
+          type: "string",
+          description: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general') where the message is located",
+        },
+        messageTs: {
+          type: "string",
+          description: "Message timestamp (e.g. '1234567890.123456') of the message to get reactions for",
+        },
+      },
+      required: ["channelIdentifier", "messageTs"],
+    },
+  },
+}
+
+/**
+ * INTR-004: Pin message
+ */
+export const pinMessage: AntispaceAppFunction<
+  "pinMessage",
+  {
+    channelIdentifier: string
+    messageTs: string
+  }
+> = {
+  type: "function",
+  function: {
+    name: "pinMessage",
+    description: "Pin a message to the channel for easy reference",
+    parameters: {
+      type: "object",
+      properties: {
+        channelIdentifier: {
+          type: "string",
+          description: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general') where the message is located",
+        },
+        messageTs: {
+          type: "string",
+          description: "Message timestamp (e.g. '1234567890.123456') of the message to pin",
+        },
+      },
+      required: ["channelIdentifier", "messageTs"],
+    },
+  },
+}
+
+/**
+ * INTR-005: Unpin message
+ */
+export const unpinMessage: AntispaceAppFunction<
+  "unpinMessage",
+  {
+    channelIdentifier: string
+    messageTs: string
+  }
+> = {
+  type: "function",
+  function: {
+    name: "unpinMessage",
+    description: "Remove a pinned message from the channel",
+    parameters: {
+      type: "object",
+      properties: {
+        channelIdentifier: {
+          type: "string",
+          description: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general') where the message is located",
+        },
+        messageTs: {
+          type: "string",
+          description: "Message timestamp (e.g. '1234567890.123456') of the message to unpin",
+        },
+      },
+      required: ["channelIdentifier", "messageTs"],
+    },
+  },
+}
+
+/**
+ * INTR-006: List pinned messages
+ */
+export const listPinnedMessages: AntispaceAppFunction<
+  "listPinnedMessages",
+  {
+    channelIdentifier: string
+  }
+> = {
+  type: "function",
+  function: {
+    name: "listPinnedMessages",
+    description: "Get all pinned messages and files in a channel",
+    parameters: {
+      type: "object",
+      properties: {
+        channelIdentifier: {
+          type: "string",
+          description: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general') to list pinned items from",
+        },
+      },
+      required: ["channelIdentifier"],
+    },
+  },
+}
+
+/**
+ * USER-002: Set user status
+ */
+export const setUserStatus: AntispaceAppFunction<
+  "setUserStatus",
+  {
+    statusText?: string
+    statusEmoji?: string
+    statusExpiration?: number
+  }
+> = {
+  type: "function",
+  function: {
+    name: "setUserStatus",
+    description: "Update your Slack status text and emoji",
+    parameters: {
+      type: "object",
+      properties: {
+        statusText: {
+          type: "string",
+          description: "Status text to display (e.g. 'In a meeting', 'Working from home'). Use empty string to clear.",
+        },
+        statusEmoji: {
+          type: "string",
+          description: "Status emoji (e.g. 'calendar', ':calendar:', 'house'). Use empty string to clear. Colons are optional.",
+        },
+        statusExpiration: {
+          type: "number",
+          description: "Unix timestamp when status should expire and be cleared automatically",
+        },
+      },
+      required: [],
+    },
+  },
+}
+
+/**
+ * USER-003: Get user presence
+ */
+export const getUserPresence: AntispaceAppFunction<
+  "getUserPresence",
+  {
+    userIdentifier: string
+  }
+> = {
+  type: "function",
+  function: {
+    name: "getUserPresence",
+    description: "Check if a user is currently active or away on Slack",
+    parameters: {
+      type: "object",
+      properties: {
+        userIdentifier: {
+          type: "string",
+          description: "User ID (e.g. U1234567890), username, or display name to check presence for",
+        },
+      },
+      required: ["userIdentifier"],
+    },
+  },
+}
+
+/**
+ * USER-004: List users
+ */
+export const listUsers: AntispaceAppFunction<
+  "listUsers",
+  {
+    limit?: number
+    cursor?: string
+    includeLocale?: boolean
+  }
+> = {
+  type: "function",
+  function: {
+    name: "listUsers",
+    description: "List all users in the Slack workspace with their profile information",
+    parameters: {
+      type: "object",
+      properties: {
+        limit: {
+          type: "number",
+          description: "Maximum number of users to return (default: 100, max: 1000)",
+        },
+        cursor: {
+          type: "string",
+          description: "Pagination cursor for getting next page of results",
+        },
+        includeLocale: {
+          type: "boolean",
+          description: "Whether to include user locale information",
+        },
+      },
+      required: [],
+    },
+  },
+}
+
+/**
+ * CONV-005: Archive conversation
+ */
+export const archiveConversation: AntispaceAppFunction<
+  "archiveConversation",
+  {
+    channelIdentifier: string
+  }
+> = {
+  type: "function",
+  function: {
+    name: "archiveConversation",
+    description: "Archive a channel to hide it from the channel list while preserving its history",
+    parameters: {
+      type: "object",
+      properties: {
+        channelIdentifier: {
+          type: "string",
+          description: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general') to archive",
+        },
+      },
+      required: ["channelIdentifier"],
+    },
+  },
+}
+
+/**
+ * CONV-006: Unarchive conversation
+ */
+export const unarchiveConversation: AntispaceAppFunction<
+  "unarchiveConversation",
+  {
+    channelIdentifier: string
+  }
+> = {
+  type: "function",
+  function: {
+    name: "unarchiveConversation",
+    description: "Restore an archived channel back to the active channel list",
+    parameters: {
+      type: "object",
+      properties: {
+        channelIdentifier: {
+          type: "string",
+          description: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general') to unarchive",
+        },
+      },
+      required: ["channelIdentifier"],
+    },
+  },
+}
+
+/**
+ * CONV-011: Set conversation topic and purpose
+ */
+export const setConversationTopicPurpose: AntispaceAppFunction<
+  "setConversationTopicPurpose",
+  {
+    channelIdentifier: string
+    topic?: string
+    purpose?: string
+  }
+> = {
+  type: "function",
+  function: {
+    name: "setConversationTopicPurpose",
+    description: "Update the topic and/or purpose of a channel",
+    parameters: {
+      type: "object",
+      properties: {
+        channelIdentifier: {
+          type: "string",
+          description: "Channel ID (e.g. C1234567890) or channel name (e.g. 'general' or '#general') to update",
+        },
+        topic: {
+          type: "string",
+          description: "New topic for the channel (short description shown in channel header)",
+        },
+        purpose: {
+          type: "string",
+          description: "New purpose for the channel (longer description of channel's intended use)",
+        },
+      },
+      required: ["channelIdentifier"],
     },
   },
 }

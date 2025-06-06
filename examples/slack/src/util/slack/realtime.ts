@@ -12,6 +12,7 @@ import type {
 } from './types'
 import { validateUserAuth } from './auth'
 import { clientPool, handleSlackResponse, SlackAPIError, processBatch } from './client'
+import { resolveConversationId } from './utils'
 
 /**
  * RT-001: Get total unread summary for the user
@@ -152,12 +153,12 @@ export async function getTotalUnreadSummary(user: User): Promise<UnreadSummary &
  */
 export async function markConversationAsRead(
   user: User,
-  conversationId: string,
+  conversationIdentifier: string,
   latestMessageTs?: string
 ): Promise<SlackAPIResponse> {
   try {
     console.log('✅ Marking conversation as read:', {
-      conversationId,
+      conversationIdentifier,
       latestMessageTs: latestMessageTs ? `${latestMessageTs.substring(0, 15)}...` : undefined
     })
 
@@ -165,23 +166,17 @@ export async function markConversationAsRead(
     const client = clientPool.getClient(user.accessToken!)
 
     return handleSlackResponse(async () => {
-      let actualConversationId = conversationId
-      
-      // If a user ID is passed instead of conversation ID, find the DM conversation
-      if (conversationId.startsWith('U')) {
-        console.log('🔄 User ID detected, finding DM conversation...')
-        
-        // Open/create a DM conversation with this user
-        const dmResult = await client.conversations.open({
-          users: conversationId
-        })
-        
-        if (dmResult.ok && dmResult.channel?.id) {
-          actualConversationId = dmResult.channel.id
-          console.log(`✅ Found DM conversation: ${actualConversationId} for user ${conversationId}`)
-        } else {
-          throw new SlackAPIError(`Failed to find DM conversation for user ${conversationId}: ${dmResult.error}`, 'API_ERROR')
-        }
+      // Resolve conversation ID (supports channel names, IDs, usernames, user IDs for DMs)
+      let actualConversationId;
+      try {
+        actualConversationId = await resolveConversationId(client, conversationIdentifier, {
+          includePrivate: true,
+          includeArchived: false,
+          allowDMs: true
+        });
+      } catch (error) {
+        console.error('❌ Failed to resolve conversation for marking as read:', error);
+        throw error;
       }
 
       // If no specific timestamp provided, get the latest message timestamp
@@ -354,7 +349,7 @@ export async function getRecentUnreadMessages(
  */
 export async function markSpecificMessagesAsRead(
   user: User,
-  conversationId: string,
+  conversationIdentifier: string,
   target: { messageTs?: string, threadTs?: string }
 ): Promise<any> {
   return {

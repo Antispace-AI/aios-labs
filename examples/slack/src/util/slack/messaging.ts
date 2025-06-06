@@ -11,13 +11,14 @@ import type {
 } from './types'
 import { validateUserAuth } from './auth'
 import { clientPool, handleSlackResponse, SlackAPIError } from './client'
+import { resolveConversationId } from './utils'
 
 /**
  * MSG-001: Get messages from a conversation, with threading support
  */
 export async function getMessages(
   user: User,
-  channelNameOrId: string,
+  channelIdentifier: string,
   limit?: number,
   cursor?: string,
   oldest?: string,
@@ -26,7 +27,7 @@ export async function getMessages(
 ): Promise<MessagesResponse> {
   try {
     console.log('📬 Getting messages:', {
-      channelNameOrId,
+      channelIdentifier,
       limit,
       threadTs: threadTs ? `${threadTs.substring(0, 15)}...` : undefined
     })
@@ -34,13 +35,16 @@ export async function getMessages(
     validateUserAuth(user)
     const client = clientPool.getClient(user.accessToken!)
     
-    // Resolve channel name to ID if needed
+    // Resolve conversation ID (supports channels and DMs)
     let channelId;
     try {
-      const { resolveChannelNameToId } = await import('../slack/index.js');
-      channelId = await resolveChannelNameToId(client, channelNameOrId);
+      channelId = await resolveConversationId(client, channelIdentifier, {
+        includePrivate: true,
+        includeArchived: false,
+        allowDMs: true
+      });
     } catch (error) {
-      console.error('❌ Failed to resolve channel name:', error);
+      console.error('❌ Failed to resolve conversation:', error);
       throw error;
     }
 
@@ -112,11 +116,11 @@ export async function getMessages(
     console.error('❌ Failed to get messages:', error)
     
     if (error instanceof SlackAPIError) {
-      if (error.code === 'CHANNEL_NOT_FOUND') {
+      if (error.code === 'CHANNEL_NOT_FOUND' || error.code === 'USER_NOT_FOUND') {
         return {
           success: false,
           messages: [],
-          error: `Channel "${channelNameOrId}" not found. Please provide a valid channel name or ID.`
+          error: `Conversation "${channelIdentifier}" not found. Please provide a valid channel name, user ID, or username.`
         }
       }
       return {
@@ -139,7 +143,7 @@ export async function getMessages(
  */
 export async function sendMessage(
   user: User,
-  channelNameOrId: string,
+  channelIdentifier: string,
   text: string,
   blocks?: any[],
   threadTs?: string,
@@ -147,7 +151,7 @@ export async function sendMessage(
 ): Promise<MessageSendResponse> {
   try {
     console.log('📤 Sending message:', {
-      channelNameOrId,
+      channelIdentifier,
       textLength: text.length,
       hasBlocks: !!blocks,
       isThreadReply: !!threadTs
@@ -156,13 +160,16 @@ export async function sendMessage(
     validateUserAuth(user)
     const client = clientPool.getClient(user.accessToken!)
     
-    // Resolve channel name to ID if needed
+    // Resolve conversation ID (supports channels and DMs)
     let channelId;
     try {
-      const { resolveChannelNameToId } = await import('../slack/index.js');
-      channelId = await resolveChannelNameToId(client, channelNameOrId);
+      channelId = await resolveConversationId(client, channelIdentifier, {
+        includePrivate: true,
+        includeArchived: false,
+        allowDMs: true
+      });
     } catch (error) {
-      console.error('❌ Failed to resolve channel name:', error);
+      console.error('❌ Failed to resolve conversation:', error);
       throw error;
     }
 
@@ -210,10 +217,10 @@ export async function sendMessage(
     console.error('❌ Failed to send message:', error)
     
     if (error instanceof SlackAPIError) {
-      if (error.code === 'CHANNEL_NOT_FOUND') {
+      if (error.code === 'CHANNEL_NOT_FOUND' || error.code === 'USER_NOT_FOUND') {
         return {
           success: false,
-          error: `Channel "${channelNameOrId}" not found. Please provide a valid channel name or ID.`
+          error: `Conversation "${channelIdentifier}" not found. Please provide a valid channel name, user ID, or username.`
         }
       }
       return {
@@ -235,14 +242,14 @@ export async function sendMessage(
  */
 export async function updateMessage(
   user: User,
-  channelNameOrId: string,
+  channelIdentifier: string,
   messageTs: string,
   text?: string,
   blocks?: any[]
 ): Promise<{ success: boolean, message?: SlackMessage, error?: string }> {
   try {
     console.log('✏️ Updating message:', {
-      channelNameOrId,
+      channelIdentifier,
       messageTs: `${messageTs.substring(0, 15)}...`,
       hasText: !!text,
       hasBlocks: !!blocks
@@ -251,13 +258,16 @@ export async function updateMessage(
     validateUserAuth(user)
     const client = clientPool.getClient(user.accessToken!)
     
-    // Resolve channel name to ID if needed
+    // Resolve conversation ID (supports channels and DMs)
     let channelId;
     try {
-      const { resolveChannelNameToId } = await import('../slack/index.js');
-      channelId = await resolveChannelNameToId(client, channelNameOrId);
+      channelId = await resolveConversationId(client, channelIdentifier, {
+        includePrivate: true,
+        includeArchived: false,
+        allowDMs: true
+      });
     } catch (error) {
-      console.error('❌ Failed to resolve channel name:', error);
+      console.error('❌ Failed to resolve conversation:', error);
       throw error;
     }
 
@@ -304,7 +314,7 @@ export async function updateMessage(
       if (error.code === 'CHANNEL_NOT_FOUND') {
         return {
           success: false,
-          error: `Channel "${channelNameOrId}" not found. Please provide a valid channel name or ID.`
+          error: `Channel "${channelIdentifier}" not found. Please provide a valid channel name or ID.`
         }
       }
       return {
@@ -325,25 +335,28 @@ export async function updateMessage(
  */
 export async function deleteMessage(
   user: User,
-  channelNameOrId: string,
+  channelIdentifier: string,
   messageTs: string
 ): Promise<{ success: boolean, error?: string }> {
   try {
     console.log('🗑️ Deleting message:', {
-      channelNameOrId,
+      channelIdentifier,
       messageTs: `${messageTs.substring(0, 15)}...`
     })
 
     validateUserAuth(user)
     const client = clientPool.getClient(user.accessToken!)
     
-    // Resolve channel name to ID if needed
+    // Resolve conversation ID (supports channels and DMs)
     let channelId;
     try {
-      const { resolveChannelNameToId } = await import('../slack/index.js');
-      channelId = await resolveChannelNameToId(client, channelNameOrId);
+      channelId = await resolveConversationId(client, channelIdentifier, {
+        includePrivate: true,
+        includeArchived: false,
+        allowDMs: true
+      });
     } catch (error) {
-      console.error('❌ Failed to resolve channel name:', error);
+      console.error('❌ Failed to resolve conversation:', error);
       throw error;
     }
 
@@ -372,7 +385,7 @@ export async function deleteMessage(
       if (error.code === 'CHANNEL_NOT_FOUND') {
         return {
           success: false,
-          error: `Channel "${channelNameOrId}" not found. Please provide a valid channel name or ID.`
+          error: `Channel "${channelIdentifier}" not found. Please provide a valid channel name or ID.`
         }
       }
       return {
@@ -393,25 +406,28 @@ export async function deleteMessage(
  */
 export async function getMessagePermalink(
   user: User,
-  channelNameOrId: string,
+  channelIdentifier: string,
   messageTs: string
 ): Promise<{ success: boolean, permalink?: string, error?: string }> {
   try {
     console.log('🔗 Getting message permalink:', {
-      channelNameOrId,
+      channelIdentifier,
       messageTs: `${messageTs.substring(0, 15)}...`
     })
 
     validateUserAuth(user)
     const client = clientPool.getClient(user.accessToken!)
     
-    // Resolve channel name to ID if needed
+    // Resolve conversation ID (supports channels and DMs)
     let channelId;
     try {
-      const { resolveChannelNameToId } = await import('../slack/index.js');
-      channelId = await resolveChannelNameToId(client, channelNameOrId);
+      channelId = await resolveConversationId(client, channelIdentifier, {
+        includePrivate: true,
+        includeArchived: false,
+        allowDMs: true
+      });
     } catch (error) {
-      console.error('❌ Failed to resolve channel name:', error);
+      console.error('❌ Failed to resolve conversation:', error);
       throw error;
     }
 
@@ -441,7 +457,7 @@ export async function getMessagePermalink(
       if (error.code === 'CHANNEL_NOT_FOUND') {
         return {
           success: false,
-          error: `Channel "${channelNameOrId}" not found. Please provide a valid channel name or ID.`
+          error: `Channel "${channelIdentifier}" not found. Please provide a valid channel name or ID.`
         }
       }
       return {

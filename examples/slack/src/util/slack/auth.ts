@@ -69,7 +69,7 @@ export async function getOAuthURL(
     oauthURL.searchParams.set('scope', finalScopes.join(','))
     oauthURL.searchParams.set('redirect_uri', finalRedirectUri)
     oauthURL.searchParams.set('state', state)
-    oauthURL.searchParams.set('user_scope', 'users:read,users.profile:read')
+    oauthURL.searchParams.set('user_scope', 'users:read,users.profile:read,users.profile:write')
 
     console.log('🔑 Generated OAuth URL:', {
       clientId: SLACK_CONFIG.clientId,

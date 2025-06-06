@@ -7,20 +7,21 @@ import type { User } from '../index'
 import type { SlackAPIResponse } from './types'
 import { validateUserAuth } from './auth'
 import { clientPool, handleSlackResponse, SlackAPIError } from './client'
+import { resolveConversationId } from './utils'
 
 /**
  * FILE-001: listFiles - Phase 2A Implementation
  */
 export async function listFiles(
   user: User,
-  conversationId?: string,
+  conversationIdentifier?: string,
   types?: string,
   limit?: number,
   page?: number
 ): Promise<{ success: boolean, files: any[], totalFiles?: number, nextPageCursor?: string, error?: string }> {
   try {
     console.log('📁 Listing files:', {
-      conversationId,
+      conversationIdentifier,
       types,
       limit,
       page
@@ -35,8 +36,19 @@ export async function listFiles(
         page: page || 1
       }
 
-      if (conversationId) {
-        queryParams.channel = conversationId
+      if (conversationIdentifier) {
+        // Resolve conversation ID if needed
+        try {
+          const resolvedId = await resolveConversationId(client, conversationIdentifier, {
+            includePrivate: true,
+            includeArchived: false,
+            allowDMs: true
+          });
+          queryParams.channel = resolvedId
+        } catch (error) {
+          console.error('❌ Failed to resolve conversation for file listing:', error);
+          throw error;
+        }
       }
 
       if (types && types.trim()) {
@@ -122,7 +134,7 @@ export async function listFiles(
  */
 export async function uploadFile(
   user: User,
-  conversationId: string,
+  conversationIdentifier: string,
   file: Buffer | string,
   filename: string,
   title?: string,
@@ -131,7 +143,7 @@ export async function uploadFile(
 ): Promise<{ success: boolean, file?: any, error?: string }> {
   try {
     console.log('📤 Uploading file:', {
-      conversationId,
+      conversationIdentifier,
       filename,
       title,
       hasComment: !!initialComment,
@@ -141,9 +153,22 @@ export async function uploadFile(
     validateUserAuth(user)
     const client = clientPool.getClient(user.accessToken!)
 
+    // Resolve conversation ID if needed
+    let resolvedConversationId;
+    try {
+      resolvedConversationId = await resolveConversationId(client, conversationIdentifier, {
+        includePrivate: true,
+        includeArchived: false,
+        allowDMs: true
+      });
+    } catch (error) {
+      console.error('❌ Failed to resolve conversation for file upload:', error);
+      throw error;
+    }
+
     return handleSlackResponse(async () => {
       const uploadParams: any = {
-        channels: conversationId,
+        channels: resolvedConversationId,
         filename,
         file
       }
