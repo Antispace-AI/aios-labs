@@ -727,7 +727,7 @@ function parseNaturalLanguageCommandFallback(command: string): { functionName: s
   return null
 }
 
-// Re-export utilities for backward compatibility
+// Export utilities
 export { resolveChannelNameToId, resolveUsernameToId, resolveConversationId } from './utils'
 
 /**
