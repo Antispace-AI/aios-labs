@@ -1,11 +1,11 @@
-import { sendMessage, getMessages, updateMessage, deleteMessage, getMessagePermalink } from "../../util/slack/messaging"
-import { listConversations, getConversationDetails, getConversationMembers, createConversation, joinConversation, leaveConversation, archiveConversation, unarchiveConversation, setConversationTopicPurpose } from "../../util/slack/conversations"  
-import { searchMessages } from "../../util/slack/search"
-import { getUserProfile, setUserStatus, getUserPresence, listUsers } from "../../util/slack/users"
-import { getTotalUnreadSummary, markConversationAsRead, getRecentUnreadMessages } from "../../util/slack/realtime"
-import { revokeAuthentication } from "../../util/slack/auth"
-import { listFiles, uploadFile } from "../../util/slack/files"
-import { addReaction, removeReaction, getMessageReactions, pinMessage, unpinMessage, listPinnedMessages } from "../../util/slack/interactions"
+import { sendMessage, getMessages, updateMessage, deleteMessage, getMessagePermalink } from "../../webAPI/messaging"
+import { listConversations, getConversationDetails, getConversationMembers, createConversation, joinConversation, leaveConversation, archiveConversation, unarchiveConversation, setConversationTopicPurpose } from "../../webAPI/conversations"  
+import { searchMessages } from "../../webAPI/search"
+import { getUserProfile, setUserStatus, getUserPresence, listUsers } from "../../webAPI/users"
+import { getTotalUnreadSummary, markConversationAsRead, getRecentUnreadMessages } from "../../webAPI/realtime"
+import { revokeAuthentication } from "../../webAPI/auth"
+import { listFiles, uploadFile } from "../../webAPI/files"
+import { addReaction, removeReaction, getMessageReactions, pinMessage, unpinMessage, listPinnedMessages } from "../../webAPI/interactions"
 import type { User } from "../../util"
 
 /**
@@ -244,7 +244,7 @@ export async function executeSlackFunctionBypass(
     console.log(`🚨 DEVELOPER MODE: Starting bypass execution of ${functionName}`)
     
     // Import the bypass utility
-    const { executeWithBypassedRateLimit } = await import("../../util/slack/index.js")
+    const { executeWithBypassedRateLimit } = await import("../../webAPI/index.js")
     
     const result = await executeWithBypassedRateLimit(async () => {
       // Execute the function normally, but rate limiting is bypassed
@@ -277,7 +277,7 @@ export async function executeNaturalLanguageBypass(
     console.log(`🚨 DEVELOPER MODE: Starting natural language bypass for: "${command}"`)
     
     // Import the utilities
-    const { executeWithBypassedRateLimit, parseNaturalLanguageCommand } = await import("../../util/slack/index.js")
+    const { executeWithBypassedRateLimit, parseNaturalLanguageCommand } = await import("../../webAPI/index.js")
     
     const parsed = await parseNaturalLanguageCommand(command)
     

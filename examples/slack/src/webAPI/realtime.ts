@@ -4,7 +4,7 @@
  * Provides basic unread tracking and read state management
  */
 
-import type { User } from '../index'
+import type { User } from '../util'
 import type { 
   UnreadSummary,
   SlackAPIResponse,

@@ -3,7 +3,7 @@
  * Implements: INTR-001, INTR-002, INTR-003, INTR-004, INTR-005, INTR-006
  */
 
-import type { User } from '../index'
+import type { User } from '../util'
 import { validateUserAuth } from './auth'
 import { clientPool, handleSlackResponse, SlackAPIError } from './client'
 import { resolveChannelNameToId } from './utils'

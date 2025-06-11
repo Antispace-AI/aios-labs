@@ -3,7 +3,7 @@
  * Implements: FILE-001, FILE-002
  */
 
-import type { User } from '../index'
+import type { User } from '../util'
 import type { SlackAPIResponse } from './types'
 import { validateUserAuth } from './auth'
 import { clientPool, handleSlackResponse, SlackAPIError } from './client'

@@ -4,7 +4,7 @@
  */
 
 import { WebClient } from '@slack/web-api'
-import type { User } from '../index'
+import type { User } from '../util'
 import type { 
   OAuthResponse, 
   AuthStatusResponse, 

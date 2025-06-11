@@ -3,7 +3,7 @@
  * Implements: MSG-001, MSG-002
  */
 
-import type { User } from '../index'
+import type { User } from '../util'
 import type { 
   SlackMessage,
   MessagesResponse,

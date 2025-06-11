@@ -1,10 +1,10 @@
 import type { AntispaceAIRequest } from "@antispace/sdk"
 import type manifest from "../manifest"
 import { getUser, updateUserTokens } from "../util"
-import { sendMessage, getMessages } from "../util/slack/messaging"
-import { listConversations, getConversationDetails } from "../util/slack/conversations"
-import { searchMessages } from "../util/slack/search"
-import { getUserProfile } from "../util/slack/users"
+import { sendMessage, getMessages } from "../webAPI/messaging"
+import { listConversations, getConversationDetails } from "../webAPI/conversations"
+import { searchMessages } from "../webAPI/search"
+import { getUserProfile } from "../webAPI/users"
 
 // Extracted handler modules for better separation of concerns
 import { handleAuthenticationActions } from './handlers/auth'
