@@ -1,24 +1,17 @@
 import type { Context } from "hono"
 import { logger } from "../../util/logger"
-import type { SlackWebhookRequest, SlackUrlVerificationRequest, SlackEventCallbackRequest, SupportedSlackEvent, EventProcessingContext } from "../../events/types/events"
+import type { SlackWebhookRequest, SlackUrlVerificationRequest, SlackEventCallbackRequest } from "../../events/types/events"
 import { validateWebhookRequest } from "../../events/webhook/validation"
 import { getEventsConfig } from "../../events/config/events"
-import { routeSlackEvent, initializeEventHandlers } from "../../events/processors"
 
 /**
  * Slack Events API Webhook Endpoint
  * 
  * This endpoint receives HTTP POST requests from Slack's Events API.
- * It handles user events (not bot events) since the app acts on behalf of users
- * via OAuth tokens, enabling real-time tracking of user activity.
- * 
- * Handles two main types of requests:
+ * It handles two main types of requests:
  * 1. url_verification - Initial challenge when setting up the webhook
- * 2. event_callback - Actual user events from Slack workspace
+ * 2. event_callback - Actual events from Slack workspace
  */
-
-// Initialize event handlers when module loads
-initializeEventHandlers()
 export default async function slackEventsHandler(c: Context) {
   try {
     // Get Events API configuration
@@ -65,37 +58,18 @@ export default async function slackEventsHandler(c: Context) {
       return c.text(verificationRequest.challenge)
     }
 
-    // Handle event callbacks (user events)
+    // Handle event callbacks
     if (request.type === 'event_callback') {
       const eventRequest = request as SlackEventCallbackRequest
-      logger.info('User event callback received', {
+      logger.info('Event callback received', {
         event_type: eventRequest.event?.type,
         event_ts: eventRequest.event?.ts,
         user: eventRequest.event?.user,
-        channel: eventRequest.event?.channel,
-        team_id: eventRequest.team_id
+        channel: eventRequest.event?.channel
       })
 
-      // Process user event asynchronously
-      const context: EventProcessingContext = {
-        event_id: eventRequest.event_id,
-        team_id: eventRequest.team_id,
-        api_app_id: eventRequest.api_app_id,
-        event_time: eventRequest.event_time,
-        received_at: new Date()
-      }
-
-      // Process in background to respond quickly to Slack
-      setImmediate(async () => {
-        try {
-          await routeSlackEvent(eventRequest.event as SupportedSlackEvent, context)
-        } catch (error: any) {
-          logger.error('Background event processing failed', error, {
-            event_id: context.event_id,
-            event_type: eventRequest.event?.type
-          })
-        }
-      })
+      // TODO: Process event asynchronously
+      // For now, just acknowledge receipt
       
       return c.text('OK')
     }
