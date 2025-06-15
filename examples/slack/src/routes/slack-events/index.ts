@@ -24,7 +24,23 @@ export default async function slackEventsHandler(c: Context) {
 
     // Parse the request body
     const body = await c.req.text()
-    const request = JSON.parse(body) as SlackWebhookRequest
+    
+    // Handle empty body
+    if (!body || body.trim() === '') {
+      logger.warn('Empty request body received')
+      return c.text('Error', 200)
+    }
+    
+    let request: SlackWebhookRequest
+    try {
+      request = JSON.parse(body) as SlackWebhookRequest
+    } catch (parseError: any) {
+      logger.warn('Invalid JSON in request body', { 
+        error: parseError.message,
+        body: body.substring(0, 100) + (body.length > 100 ? '...' : '')
+      })
+      return c.text('Error', 200)
+    }
 
     // Validate request signature (skip validation for url_verification during initial setup)
     const headers = Object.fromEntries(
@@ -65,13 +81,33 @@ export default async function slackEventsHandler(c: Context) {
         event_type: eventRequest.event?.type,
         event_ts: eventRequest.event?.ts,
         user: eventRequest.event?.user,
-        channel: eventRequest.event?.channel
+        channel: eventRequest.event?.channel,
+        event_id: eventRequest.event_id
       })
 
-      // TODO: Process event asynchronously
-      // For now, just acknowledge receipt
+      // Acknowledge immediately to Slack (must respond within 3 seconds)
+      const response = c.text('OK')
       
-      return c.text('OK')
+      // Process event asynchronously after acknowledgment
+      setImmediate(async () => {
+        try {
+          logger.info('Processing event asynchronously', {
+            event_id: eventRequest.event_id,
+            event_type: eventRequest.event?.type
+          })
+          
+          // TODO: Route to event processors when implemented
+          // await routeSlackEvent(eventRequest.event, context)
+          
+        } catch (error: any) {
+          logger.error('Async event processing failed', error, {
+            event_id: eventRequest.event_id,
+            event_type: eventRequest.event?.type
+          })
+        }
+      })
+      
+      return response
     }
 
     // Handle unknown event types
