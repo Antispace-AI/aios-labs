@@ -54,6 +54,11 @@ export interface SlackMessageEvent extends SlackEvent {
     user: string
     ts: string
   }
+  files?: SlackFile[]
+  reactions?: SlackReaction[]
+  reply_count?: number
+  reply_users_count?: number
+  latest_reply?: string
 }
 
 // Channel marked events (when user reads messages)
@@ -63,6 +68,7 @@ export interface SlackChannelMarkedEvent extends SlackEvent {
   ts: string
   user: string
   unread_count?: number
+  unread_count_display?: number
 }
 
 // User presence events
@@ -90,6 +96,7 @@ export interface SlackGroupMarkedEvent extends SlackEvent {
   ts: string
   user: string
   unread_count?: number
+  unread_count_display?: number
 }
 
 export interface SlackImMarkedEvent extends SlackEvent {
@@ -98,6 +105,7 @@ export interface SlackImMarkedEvent extends SlackEvent {
   ts: string
   user: string
   unread_count?: number
+  unread_count_display?: number
 }
 
 export interface SlackMpimMarkedEvent extends SlackEvent {
@@ -106,6 +114,7 @@ export interface SlackMpimMarkedEvent extends SlackEvent {
   ts: string
   user: string
   unread_count?: number
+  unread_count_display?: number
 }
 
 // User profile/status events
@@ -154,6 +163,110 @@ export interface SlackTokensRevokedEvent extends SlackEvent {
   }
 }
 
+// Supporting Types
+export interface SlackFile {
+  id: string
+  name: string
+  title?: string
+  mimetype: string
+  filetype: string
+  pretty_type: string
+  user: string
+  size: number
+  url_private: string
+  url_private_download: string
+  permalink: string
+  permalink_public?: string
+  thumb_64?: string
+  thumb_80?: string
+  thumb_360?: string
+  thumb_360_w?: number
+  thumb_360_h?: number
+}
+
+export interface SlackReaction {
+  name: string
+  users: string[]
+  count: number
+}
+
+export interface SlackUser {
+  id: string
+  team_id: string
+  name: string
+  deleted: boolean
+  color?: string
+  real_name?: string
+  tz?: string
+  tz_label?: string
+  tz_offset?: number
+  profile: {
+    title?: string
+    phone?: string
+    skype?: string
+    real_name?: string
+    real_name_normalized?: string
+    display_name?: string
+    display_name_normalized?: string
+    status_text?: string
+    status_emoji?: string
+    status_expiration?: number
+    avatar_hash?: string
+    image_24?: string
+    image_32?: string
+    image_48?: string
+    image_72?: string
+    image_192?: string
+    image_512?: string
+    email?: string
+    first_name?: string
+    last_name?: string
+  }
+  is_admin?: boolean
+  is_owner?: boolean
+  is_primary_owner?: boolean
+  is_restricted?: boolean
+  is_ultra_restricted?: boolean
+  is_bot?: boolean
+  is_app_user?: boolean
+  updated: number
+  presence?: 'active' | 'away'
+}
+
+export interface SlackChannel {
+  id: string
+  name: string
+  is_channel: boolean
+  is_group: boolean
+  is_im: boolean
+  is_mpim: boolean
+  is_private: boolean
+  created: number
+  is_archived: boolean
+  is_general: boolean
+  unlinked: number
+  name_normalized: string
+  is_shared: boolean
+  is_org_shared: boolean
+  is_member: boolean
+  is_open?: boolean
+  last_read?: string
+  latest?: SlackMessageEvent
+  unread_count?: number
+  unread_count_display?: number
+  members?: string[]
+  topic?: {
+    value: string
+    creator: string
+    last_set: number
+  }
+  purpose?: {
+    value: string
+    creator: string
+    last_set: number
+  }
+}
+
 // Union type of all events we handle
 export type SupportedSlackEvent = 
   | SlackMessageEvent
@@ -177,4 +290,53 @@ export interface EventProcessingContext {
   api_app_id: string
   event_time: number
   received_at: Date
+}
+
+// Webhook payload structure
+export interface SlackEventPayload {
+  token: string
+  team_id: string
+  api_app_id: string
+  event: SlackEvent
+  type: 'event_callback'
+  event_id: string
+  event_time: number
+  authorizations?: Array<{
+    enterprise_id?: string
+    team_id: string
+    user_id: string
+    is_bot: boolean
+    is_enterprise_install?: boolean
+  }>
+  is_ext_shared_channel?: boolean
+  event_context?: string
+}
+
+// URL verification payload
+export interface SlackUrlVerificationPayload {
+  token: string
+  challenge: string
+  type: 'url_verification'
+}
+
+// Union type for all webhook payloads
+export type SlackWebhookPayload = SlackEventPayload | SlackUrlVerificationPayload
+
+// Event processing metadata
+export interface SlackEventData {
+  eventId: string
+  userId: string
+  teamId: string
+  eventType: string
+  eventTime: number
+  event: SlackEvent
+  retryCount?: number
+  processedAt?: string
+}
+
+// Event validation result
+export interface EventValidationResult {
+  isValid: boolean
+  error?: string
+  eventData?: SlackEventData
 } 

@@ -96,8 +96,16 @@ export default async function slackEventsHandler(c: Context) {
             event_type: eventRequest.event?.type
           })
           
-          // TODO: Route to event processors when implemented
-          // await routeSlackEvent(eventRequest.event, context)
+          // Route to event processors
+          if (eventRequest.event) {
+            const { routeSlackEvent } = await import('../../events/processors/router.js')
+            await routeSlackEvent(
+              eventRequest.event,
+              eventRequest.event_id,
+              eventRequest.team_id,
+              eventRequest.event_time
+            )
+          }
           
         } catch (error: any) {
           logger.error('Async event processing failed', error, {
